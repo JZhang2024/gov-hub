@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import ContractHeader from './ContractHeader';
 import SearchBar from './SearchBar';
 import ContractRow from './ContractRow';
-import Pagination from './Pagination';
+import PaginationControls from './PaginationControls';
 import { generateMockContracts } from '@/lib/mock-data';
 
 const ContractList = () => {
@@ -83,7 +83,7 @@ const ContractList = () => {
           </div>
         )}
 
-        <Pagination
+        <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}
           startIndex={startIndex}
