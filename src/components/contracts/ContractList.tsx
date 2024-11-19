@@ -12,13 +12,14 @@ const ContractList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const contracts = useMemo(() => generateMockContracts(30), []);
+  const contracts = useMemo(() => generateMockContracts(50), []);
 
   const filteredContracts = useMemo(() => {
     return contracts.filter(contract => 
       contract.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contract.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contract.agency.toLowerCase().includes(searchQuery.toLowerCase())
+      contract.noticeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contract.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contract.subTier.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [contracts, searchQuery]);
 
@@ -62,7 +63,7 @@ const ContractList = () => {
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="grid grid-cols-12 gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-b text-sm font-medium text-gray-600">
           <div className="col-span-5 pl-2">Contract Details</div>
-          <div className="col-span-2">Agency</div>
+          <div className="col-span-2">Department</div>
           <div className="col-span-2">Value</div>
           <div className="col-span-2">Deadline</div>
           <div className="col-span-1">Status</div>
@@ -70,10 +71,10 @@ const ContractList = () => {
 
         {currentContracts.map((contract) => (
           <ContractRow
-            key={contract.id}
+            key={contract.noticeId}
             contract={contract}
-            isExpanded={expandedId === contract.id}
-            onToggle={() => setExpandedId(expandedId === contract.id ? null : contract.id)}
+            isExpanded={expandedId === contract.noticeId}
+            onToggle={() => setExpandedId(expandedId === contract.noticeId ? null : contract.noticeId)}
           />
         ))}
 

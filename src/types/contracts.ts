@@ -1,69 +1,103 @@
-
-// Main contract interface matching SAM.gov data structure
+// Main contract interface matching SAM.gov opportunities data structure
 export interface Contract {
-  id: string;
+  noticeId: string;
   title: string;
-  agency: string;
-  value: string;
-  posted: string;       // ISO date string
-  deadline: string;     // ISO date string
-  status: ContractStatus;
-  type: ContractType;
-  setAside: SetAsideType;
-  description: string;
-  naicsCode?: string;
-  location?: string;
-  activeDate?: string;  // ISO date string
-  archiveDate?: string; // ISO date string
-  awardDate?: string;   // ISO date string
-}
-
-// SAM.gov API response types
-export interface SAMApiResponse {
-  totalRecords: number;
-  page: number;
-  opportunitiesData: SAMContractData[];
-}
-
-export interface SAMContractData {
-  opportunityId: string;
-  title: string;
-  agency: {
-    name: string;
-    agencyId: string;
-    subtier: {
-      name: string;
-      subtierCode: string;
-    };
-  };
-  baseType: string;
-  type: ContractType;
-  setAside: SetAsideType;
-  responseDeadLine: string;
+  solicitationNumber?: string;
+  department: string;
+  subTier: string;
+  office: string;
   postedDate: string;
-  modifiedDate?: string;
-  contractValue?: {
-    amount: number;
-    currency: string;
-    type: 'Base' | 'Option' | 'Total';
-  };
-  description: string;
-  placeOfPerformance?: {
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  naicsCode?: string;
-  classificationCode?: string;
-  active: boolean;
-  archived: boolean;
-  cancelled: boolean;
+  type: string;
+  baseType: string;
+  archiveType: string;
+  archiveDate: string | null;
+  typeOfSetAsideDescription: string | null;
+  typeOfSetAside: string | null;
+  responseDeadLine: string | null;
+  naicsCode: string;
+  classificationCode: string;
+  active: "Yes" | "No";
   award?: {
     date: string;
-    amount: number;
-    recipient: string;
+    number: string;
+    amount: string;
+    awardee: {
+      name: string;
+      location: {
+        streetAddress: string;
+        city: {
+          code: string;
+          name: string;
+        };
+        state: {
+          code: string;
+        };
+        zip: string;
+        country: {
+          code: string;
+        };
+      };
+      ueiSAM: string;
+    };
   };
+  pointOfContact: Array<{
+    fax: string | null;
+    type: string;
+    email: string;
+    phone: string;
+    title: string;
+    fullName: string;
+  }>;
+  description: string;
+  organizationType: string;
+  officeAddress: {
+    zipcode: string;
+    city: string;
+    countryCode: string;
+    state: string;
+  };
+  placeOfPerformance: {
+    streetAddress: string;
+    city: {
+      code: string;
+      name: string;
+    };
+    state: {
+      code: string;
+    };
+    zip: string;
+    country: {
+      code: string;
+    };
+  };
+  additionalInfoLink: string | null;
+  uiLink: string;
+  links: Array<{
+    rel: string;
+    href: string;
+    hreflang: string | null;
+    media: string | null;
+    title: string | null;
+    type: string | null;
+    deprecation: string | null;
+  }>;
+}
+
+// SAM.gov Opportunities API response types
+export interface SAMApiResponse {
+  totalRecords: number;
+  limit: number;
+  offset: number;
+  opportunitiesData: Contract[];
+  links: Array<{
+    rel: string;
+    href: string;
+    hreflang: string | null;
+    media: string | null;
+    title: string | null;
+    type: string | null;
+    deprecation: string | null;
+  }>;
 }
 
 // Component Props Types
