@@ -42,12 +42,10 @@ const ContractList = () => {
 
   const handleFilter = () => {
     console.log('Filter clicked');
-    // Implement filter functionality
   };
 
   const handleExport = () => {
     console.log('Export clicked');
-    // Implement export functionality
   };
 
   return (
@@ -60,13 +58,11 @@ const ContractList = () => {
         onExport={handleExport}
       />
 
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-b text-sm font-medium text-gray-600">
-          <div className="col-span-4 pl-2">Title/Notice ID</div>
-          <div className="col-span-3">Department</div>
-          <div className="col-span-2">Set-Aside</div>
-          <div className="col-span-2">Response Due</div>
-          <div className="col-span-1">Status</div>
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden space-y-px">
+        <div className="bg-gradient-to-r from-gray-50 to-white p-4 border-b">
+          <div className="text-sm font-medium text-gray-600">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredContracts.length)} of {filteredContracts.length} opportunities
+          </div>
         </div>
 
         {currentContracts.map((contract) => (

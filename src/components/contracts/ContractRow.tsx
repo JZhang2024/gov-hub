@@ -1,55 +1,67 @@
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { ContractRowProps } from '@/types/contracts';
-import ContractCard from './ContractCard';
+// ContractRow.tsx
+import { ChevronRight, Building2, DollarSign, MapPin } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Contract, ContractRowProps } from '@/types/contracts';
+import { formatCurrency, formatDate, getStatusInfo } from '@/lib/utils/format-data';
+import ContractDetails from './ContractDetails';
 
 const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    if (dateString.includes('T')) {
-      return new Date(dateString).toLocaleString();
-    }
-    return new Date(dateString).toLocaleDateString();
-  };
+  // Parse department hierarchy from fullParentPathName
+  const departments = contract.fullParentPathName?.split('.') || [];
+  const mainDept = departments[0] || 'Unknown Department';
+  const subDept = departments[1] || '';
+
+  // Format award amount if available
+  const awardAmount = contract.award?.amount;
+  
+  const status = getStatusInfo(contract);
 
   return (
     <div className="border-b last:border-b-0 transition-all">
       <div 
-        className="grid grid-cols-12 gap-4 p-4 hover:bg-blue-50 cursor-pointer items-center transition-colors"
+        className="p-4 hover:bg-blue-50 cursor-pointer transition-colors"
         onClick={onToggle}
       >
-        <div className="col-span-4">
-          <div className="flex items-start gap-2">
-            {isExpanded ? 
-              <ChevronDown className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" /> : 
-              <ChevronRight className="h-5 w-5 mt-0.5 flex-shrink-0 text-gray-400" />
-            }
-            <div>
-              <div className="font-medium text-gray-900 line-clamp-1 hover:text-blue-600 transition-colors">
-                {contract.title}
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="font-medium">{contract.title}</h3>
+              <Badge variant="outline" className={status.className}>
+                {status.label}
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <div className="truncate">
+                  <span className="font-medium">{mainDept}</span>
+                  {subDept && (
+                    <>
+                      <ChevronRight className="inline h-3 w-3 mx-1" />
+                      <span>{subDept}</span>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 font-mono">{contract.noticeId}</div>
+              
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                <span>{awardAmount ? formatCurrency(awardAmount) : 'No Value Specified'}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                <span>
+                  {contract.placeOfPerformance.city.name}, {contract.placeOfPerformance.state.code}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-        <div className="col-span-3 text-sm line-clamp-2">{contract.fullParentPathName}</div>
-        <div className="col-span-2 text-sm">
-          {contract.typeOfSetAsideDescription || 'None'}
-        </div>
-        <div className="col-span-2 text-sm text-red-600 font-medium">
-          {contract.responseDeadLine ? formatDate(contract.responseDeadLine) : 'N/A'}
-        </div>
-        <div className="col-span-1">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            contract.active === 'Yes'
-              ? 'bg-green-100 text-green-700 ring-1 ring-green-200' 
-              : 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200'
-          }`}>
-            {contract.active === 'Yes' ? 'Active' : 'Inactive'}
-          </span>
-        </div>
       </div>
 
-      {isExpanded && <ContractCard contract={contract} onClose={onToggle} />}
+      {isExpanded && <ContractDetails contract={contract} onClose={onToggle} />}
     </div>
   );
 };
