@@ -3,11 +3,12 @@ import { ContractRowProps } from '@/types/contracts';
 import ContractCard from './ContractCard';
 
 const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
-  const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(Number(amount));
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    if (dateString.includes('T')) {
+      return new Date(dateString).toLocaleString();
+    }
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
@@ -16,7 +17,7 @@ const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
         className="grid grid-cols-12 gap-4 p-4 hover:bg-blue-50 cursor-pointer items-center transition-colors"
         onClick={onToggle}
       >
-        <div className="col-span-5">
+        <div className="col-span-4">
           <div className="flex items-start gap-2">
             {isExpanded ? 
               <ChevronDown className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" /> : 
@@ -30,12 +31,12 @@ const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
             </div>
           </div>
         </div>
-        <div className="col-span-2 text-sm">{contract.department}</div>
-        <div className="col-span-2 text-sm font-medium">
-          {contract.award ? formatCurrency(contract.award.amount) : 'N/A'}
+        <div className="col-span-3 text-sm line-clamp-2">{contract.fullParentPathName}</div>
+        <div className="col-span-2 text-sm">
+          {contract.typeOfSetAsideDescription || 'None'}
         </div>
         <div className="col-span-2 text-sm text-red-600 font-medium">
-          {contract.responseDeadLine || 'N/A'}
+          {contract.responseDeadLine ? formatDate(contract.responseDeadLine) : 'N/A'}
         </div>
         <div className="col-span-1">
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${

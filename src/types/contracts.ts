@@ -6,9 +6,9 @@ export interface Contract {
   solicitationNumber?: string;
   
   // Organizational Hierarchy
-  department: string;
-  subTier: string;
-  office: string;
+  department?: string;
+  subTier?: string;
+  office?: string;
   fullParentPathName?: string;
   fullParentPathCode?: string;
   organizationType: string;

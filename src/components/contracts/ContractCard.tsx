@@ -1,11 +1,6 @@
 import { X } from 'lucide-react';
 import { Contract } from '@/types/contracts';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ContractCardProps {
   contract: Contract;
@@ -18,6 +13,16 @@ const ContractCard = ({ contract, onClose }: ContractCardProps) => {
       style: 'currency',
       currency: 'USD'
     }).format(Number(amount));
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    if (dateString.includes('T')) {
+      // Handle ISO date with time
+      return new Date(dateString).toLocaleString();
+    }
+    // Handle date only
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
@@ -45,82 +50,115 @@ const ContractCard = ({ contract, onClose }: ContractCardProps) => {
         </CardHeader>
         <CardContent>
           <dl className="grid grid-cols-2 gap-6 text-sm">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Department</dt>
-              <dd className="font-medium text-gray-900">{contract.department}</dd>
+            <div className="col-span-2 p-4 bg-gray-50 rounded-lg">
+              <dt className="text-gray-500 mb-1">Department Path</dt>
+              <dd className="font-medium text-gray-900">{contract.fullParentPathName}</dd>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Sub-Tier</dt>
-              <dd className="font-medium text-gray-900">{contract.subTier}</dd>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Office</dt>
-              <dd className="font-medium text-gray-900">{contract.office}</dd>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Contract Value</dt>
-              <dd className="font-medium text-gray-900">
-                {contract.award ? formatCurrency(contract.award.amount) : 'Not Awarded'}
-              </dd>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Type</dt>
+              <dt className="text-gray-500 mb-1">Contract Type</dt>
               <dd className="font-medium text-gray-900">{contract.type}</dd>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <dt className="text-gray-500 mb-1">Base Type</dt>
+              <dd className="font-medium text-gray-900">{contract.baseType}</dd>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <dt className="text-gray-500 mb-1">Posted Date</dt>
+              <dd className="font-medium text-gray-900">{formatDate(contract.postedDate)}</dd>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <dt className="text-gray-500 mb-1">Response Deadline</dt>
+              <dd className="font-medium text-red-600">
+                {contract.responseDeadLine ? formatDate(contract.responseDeadLine) : 'N/A'}
+              </dd>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <dt className="text-gray-500 mb-1">Set-Aside</dt>
               <dd className="font-medium text-gray-900">{contract.typeOfSetAsideDescription || 'None'}</dd>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Posted Date</dt>
-              <dd className="font-medium text-gray-900">{contract.postedDate}</dd>
+              <dt className="text-gray-500 mb-1">Archive Info</dt>
+              <dd className="font-medium text-gray-900">
+                <div>Type: {contract.archiveType}</div>
+                {contract.archiveDate && <div>Date: {formatDate(contract.archiveDate)}</div>}
+              </dd>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Response Deadline</dt>
-              <dd className="font-medium text-red-600">{contract.responseDeadLine || 'N/A'}</dd>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">NAICS Code</dt>
-              <dd className="font-medium text-gray-900">{contract.naicsCode}</dd>
+              <dt className="text-gray-500 mb-1">NAICS Code(s)</dt>
+              <dd className="font-medium text-gray-900">
+                {contract.naicsCodes?.join(', ') || contract.naicsCode}
+              </dd>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <dt className="text-gray-500 mb-1">Classification Code</dt>
               <dd className="font-medium text-gray-900">{contract.classificationCode}</dd>
             </div>
             {contract.award && (
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="col-span-2 p-4 bg-gray-50 rounded-lg">
                 <dt className="text-gray-500 mb-1">Award Details</dt>
                 <dd className="font-medium text-gray-900">
                   <div>Awardee: {contract.award.awardee.name}</div>
                   <div>Award #: {contract.award.number}</div>
-                  <div>Date: {contract.award.date}</div>
+                  <div>Date: {formatDate(contract.award.date)}</div>
+                  <div>Amount: {formatCurrency(contract.award.amount)}</div>
+                  <div>UEI: {contract.award.awardee.ueiSAM}</div>
+                  <div className="mt-2">Location: {[
+                    contract.award.awardee.location.streetAddress,
+                    contract.award.awardee.location.city.name,
+                    contract.award.awardee.location.state.code,
+                    contract.award.awardee.location.zip
+                  ].filter(Boolean).join(', ')}</div>
                 </dd>
               </div>
             )}
             {contract.pointOfContact && contract.pointOfContact.length > 0 && (
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <dt className="text-gray-500 mb-1">Point of Contact</dt>
-                <dd className="font-medium text-gray-900">
-                  <div>{contract.pointOfContact[0].fullName}</div>
-                  <div>{contract.pointOfContact[0].title}</div>
-                  <div>{contract.pointOfContact[0].email}</div>
-                  <div>{contract.pointOfContact[0].phone}</div>
+              <div className="col-span-2 p-4 bg-gray-50 rounded-lg">
+                <dt className="text-gray-500 mb-1">Points of Contact</dt>
+                <dd className="font-medium text-gray-900 grid gap-4">
+                  {contract.pointOfContact.map((poc, index) => (
+                    <div key={index} className="border-t first:border-0 pt-4 first:pt-0">
+                      <div className="font-semibold">{poc.type.charAt(0).toUpperCase() + poc.type.slice(1)} Contact</div>
+                      <div>{poc.fullName}</div>
+                      <div>{poc.title}</div>
+                      <div>{poc.email}</div>
+                      {poc.phone && <div>Phone: {poc.phone}</div>}
+                      {poc.fax && <div>Fax: {poc.fax}</div>}
+                    </div>
+                  ))}
                 </dd>
               </div>
             )}
             <div className="col-span-2 p-4 bg-gray-50 rounded-lg">
-              <dt className="text-gray-500 mb-1">Description</dt>
-              <dd className="font-medium text-gray-900">{contract.description}</dd>
-            </div>
-            <div className="col-span-2 p-4 bg-gray-50 rounded-lg">
               <dt className="text-gray-500 mb-1">Place of Performance</dt>
               <dd className="font-medium text-gray-900">
-                <div>{contract.placeOfPerformance.streetAddress}</div>
+                {contract.placeOfPerformance.streetAddress && (
+                  <div>{contract.placeOfPerformance.streetAddress}</div>
+                )}
                 <div>
                   {contract.placeOfPerformance.city.name}, {contract.placeOfPerformance.state.code} {contract.placeOfPerformance.zip}
                 </div>
+                {contract.placeOfPerformance.country.name && (
+                  <div>{contract.placeOfPerformance.country.name}</div>
+                )}
               </dd>
             </div>
+            {contract.resourceLinks && contract.resourceLinks.length > 0 && (
+              <div className="col-span-2 p-4 bg-gray-50 rounded-lg">
+                <dt className="text-gray-500 mb-1">Resource Links</dt>
+                <dd className="font-medium text-gray-900">
+                  <ul className="list-disc pl-4">
+                    {contract.resourceLinks.map((link, index) => (
+                      <li key={index}>
+                        <a href={link} target="_blank" rel="noopener noreferrer" 
+                           className="text-blue-600 hover:text-blue-800 underline">
+                          Resource {index + 1}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            )}
           </dl>
         </CardContent>
       </Card>

@@ -18,8 +18,8 @@ const ContractList = () => {
     return contracts.filter(contract => 
       contract.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contract.noticeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contract.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contract.subTier.toLowerCase().includes(searchQuery.toLowerCase())
+      contract.fullParentPathName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      contract.solicitationNumber?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [contracts, searchQuery]);
 
@@ -62,10 +62,10 @@ const ContractList = () => {
 
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="grid grid-cols-12 gap-4 p-4 bg-gradient-to-r from-gray-50 to-white border-b text-sm font-medium text-gray-600">
-          <div className="col-span-5 pl-2">Contract Details</div>
-          <div className="col-span-2">Department</div>
-          <div className="col-span-2">Value</div>
-          <div className="col-span-2">Deadline</div>
+          <div className="col-span-4 pl-2">Title/Notice ID</div>
+          <div className="col-span-3">Department</div>
+          <div className="col-span-2">Set-Aside</div>
+          <div className="col-span-2">Response Due</div>
           <div className="col-span-1">Status</div>
         </div>
 
@@ -87,8 +87,8 @@ const ContractList = () => {
         <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}
-          startIndex={startIndex}
-          endIndex={endIndex}
+          startIndex={startIndex + 1}
+          endIndex={Math.min(endIndex, filteredContracts.length)}
           totalItems={filteredContracts.length}
           onPageChange={handlePageChange}
         />
@@ -97,4 +97,4 @@ const ContractList = () => {
   );
 };
 
-export default ContractList
+export default ContractList;
