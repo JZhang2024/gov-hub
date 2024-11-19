@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { format, subDays } from 'date-fns'
 
 const corsHeaders = {
@@ -27,7 +28,7 @@ serve(async (req) => {
       `${Deno.env.get('SAM_API_URL')}?` +
       `postedFrom=${yesterday}&` +
       `postedTo=${today}&` +
-      `limit=1000` +
+      `limit=1000&` +
       `offset=0`,
       {
         headers: {
