@@ -1,0 +1,505 @@
+# Example cURL Request
+curl -X GET "https://api-alpha.sam.gov/opportunities/v2/search\
+?postedFrom=08/19/2024\
+&postedTo=11/19/2024\
+&limit=5\
+&offset=0\
+&api_key=API_KEY"
+
+# Example Response
+{
+  "totalRecords": 1402,
+  "limit": 5,
+  "offset": 0,
+  "opportunitiesData": [
+    {
+      "noticeId": "f8941f369ab04202907de731b5b71cd0",
+      "title": "DIESEL ENGINES",
+      "solicitationNumber": "RODRIGUEZ14-FATS1278236DE141-DE1",
+      "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE AIR FORCE.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047  802 CONS CC JBSA",
+      "fullParentPathCode": "057.5700.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047",
+      "postedDate": "2024-09-19",
+      "type": "Combined Synopsis/Solicitation",
+      "baseType": "Combined Synopsis/Solicitation",
+      "archiveType": "autocustom",
+      "archiveDate": "2024-10-29",
+      "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)",
+      "typeOfSetAside": "SBA",
+      "responseDeadLine": "2024-09-23T13:30:00-05:00",
+      "naicsCode": "333618",
+      "naicsCodes": ["333618"],
+      "classificationCode": "2815",
+      "active": "Yes",
+      "award": null,
+      "pointOfContact": [
+        {
+          "fax": "2108675309",
+          "type": "primary",
+          "email": "brenda.rodriguez.3@us.af.mil",
+          "phone": "2108675309",
+          "title": null,
+          "fullName": "SSgt Brenda Rodriguez"
+        },
+        {
+          "fax": "2108675309",
+          "type": "secondary",
+          "email": "brenda.rodriguez.3@us.af.mil",
+          "phone": "2108675309",
+          "title": null,
+          "fullName": "SSgt Brenda Rodriguez"
+        }
+      ],
+      "description": "https://api-alpha.sam.gov/prodlike/opportunities/v1/noticedesc?noticeid=f8941f369ab04202907de731b5b71cd0",
+      "organizationType": "OFFICE",
+      "officeAddress": {
+        "zipcode": "78236-5286",
+        "city": "JBSA LACKLAND",
+        "countryCode": "USA",
+        "state": "TX"
+      },
+      "placeOfPerformance": {
+        "city": {
+          "code": "0",
+          "name": "Heartland"
+        },
+        "state": {
+          "code": "TX",
+          "name": "Texas"
+        },
+        "zip": "78236",
+        "country": {
+          "code": "USA",
+          "name": "UNITED STATES"
+        }
+      },
+      "additionalInfoLink": null,
+      "uiLink": "https://alpha.sam.gov/opp/f8941f369ab04202907de731b5b71cd0/view",
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://api-alpha.sam.gov/prodlike/opportunities/v2/search?noticeid=f8941f369ab04202907de731b5b71cd0&limit=1"
+        }
+      ],
+      "resourceLinks": [
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/1eca4d057f2349d5bcf2142981106dcb/download"
+      ]
+    },
+    {
+      "noticeId": "f402e708fe12460698b272b669694091",
+      "title": "Diesel Engines",
+      "solicitationNumber": "HYDE05-FATS1278236DE05-DE",
+      "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE AIR FORCE.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047  802 CONS CC JBSA",
+      "fullParentPathCode": "057.5700.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047",
+      "postedDate": "2024-09-19",
+      "type": "Combined Synopsis/Solicitation",
+      "baseType": "Combined Synopsis/Solicitation",
+      "archiveType": "autocustom",
+      "archiveDate": "2024-10-29",
+      "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)",
+      "typeOfSetAside": "SBA",
+      "responseDeadLine": "2024-09-23T13:30:00-05:00",
+      "naicsCode": "333618",
+      "naicsCodes": ["333618"],
+      "classificationCode": "2815",
+      "active": "Yes",
+      "award": null,
+      "pointOfContact": [
+        {
+          "fax": null,
+          "type": "primary",
+          "email": "jhayde.hyde@us.af.mil",
+          "phone": null,
+          "title": null,
+          "fullName": "Jhayde Hyde "
+        },
+        {
+          "fax": "2108675309",
+          "type": "secondary",
+          "email": "brenda.rodriguez.3@us.af.mil",
+          "phone": "2108675309",
+          "title": null,
+          "fullName": "SSgt Brenda Rodriguez"
+        }
+      ],
+      "description": "https://api-alpha.sam.gov/prodlike/opportunities/v1/noticedesc?noticeid=f402e708fe12460698b272b669694091",
+      "organizationType": "OFFICE",
+      "officeAddress": {
+        "zipcode": "78236-5286",
+        "city": "JBSA LACKLAND",
+        "countryCode": "USA",
+        "state": "TX"
+      },
+      "placeOfPerformance": {
+        "city": {
+          "code": "0",
+          "name": "Heartland"
+        },
+        "state": {
+          "code": "TX",
+          "name": "Texas"
+        },
+        "zip": "78236",
+        "country": {
+          "code": "USA",
+          "name": "UNITED STATES"
+        }
+      },
+      "additionalInfoLink": null,
+      "uiLink": "https://alpha.sam.gov/opp/f402e708fe12460698b272b669694091/view",
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://api-alpha.sam.gov/prodlike/opportunities/v2/search?noticeid=f402e708fe12460698b272b669694091&limit=1"
+        }
+      ],
+      "resourceLinks": [
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/35200dcbb9164a46a7cd399b001a9b99/download"
+      ]
+    },
+    {
+      "noticeId": "ee51a93bb9e94bcf959a74c2ab66e2dc",
+      "title": "Carnival Ride",
+      "solicitationNumber": "HATCH10-FA300224Q0003-CR",
+      "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE AIR FORCE.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047  802 CONS CC JBSA",
+      "fullParentPathCode": "057.5700.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047",
+      "postedDate": "2024-09-19",
+      "type": "Solicitation",
+      "baseType": "Presolicitation",
+      "archiveType": "autocustom",
+      "archiveDate": "2024-10-23",
+      "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)",
+      "typeOfSetAside": "SBA",
+      "responseDeadLine": "2024-09-23T13:30:00-05:00",
+      "naicsCode": "811310",
+      "naicsCodes": ["811310"],
+      "classificationCode": "J036",
+      "active": "Yes",
+      "award": null,
+      "pointOfContact": [
+        {
+          "fax": "2108675309",
+          "type": "primary",
+          "email": "michael.hatch.5@us.af.mil",
+          "phone": "2108675309",
+          "title": null,
+          "fullName": "SSgt Michael Hatch"
+        },
+        {
+          "fax": "2108675307",
+          "type": "secondary",
+          "email": "john.cruz.286@us.af.mil",
+          "phone": "2108675307",
+          "title": null,
+          "fullName": "TSgt John Cruz"
+        }
+      ],
+      "description": "https://api-alpha.sam.gov/prodlike/opportunities/v1/noticedesc?noticeid=ee51a93bb9e94bcf959a74c2ab66e2dc",
+      "organizationType": "OFFICE",
+      "officeAddress": {
+        "zipcode": "78236-5286",
+        "city": "JBSA LACKLAND",
+        "countryCode": "USA",
+        "state": "TX"
+      },
+      "placeOfPerformance": {
+        "city": {
+          "code": "0",
+          "name": "Heartland"
+        },
+        "state": {
+          "code": "TX",
+          "name": "Texas"
+        },
+        "zip": "78236",
+        "country": {
+          "code": "USA",
+          "name": "UNITED STATES"
+        }
+      },
+      "additionalInfoLink": null,
+      "uiLink": "https://alpha.sam.gov/opp/ee51a93bb9e94bcf959a74c2ab66e2dc/view",
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://api-alpha.sam.gov/prodlike/opportunities/v2/search?noticeid=ee51a93bb9e94bcf959a74c2ab66e2dc&limit=1"
+        }
+      ],
+      "resourceLinks": [
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/05e67656c79f4e4c8901dff33124dd06/download",
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/92774f0c4e834177805f09b03f275149/download",
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/db75974e43b54afd99173f51b3104fd9/download",
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/e8b3aef3ec204720ac1e079569480f42/download"
+      ]
+    },
+    {
+      "noticeId": "ee48fc2a9be44ae9befc4ee7cd13d019",
+      "title": "DIESEL ENGINES",
+      "solicitationNumber": "HICKS04-FATS1278236DE04-DE",
+      "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE AIR FORCE.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047  802 CONS CC JBSA",
+      "fullParentPathCode": "057.5700.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047",
+      "postedDate": "2024-09-19",
+      "type": "Combined Synopsis/Solicitation",
+      "baseType": "Combined Synopsis/Solicitation",
+      "archiveType": "autocustom",
+      "archiveDate": "2024-10-29",
+      "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)",
+      "typeOfSetAside": "SBA",
+      "responseDeadLine": "2024-09-23T13:30:00-05:00",
+      "naicsCode": "333618",
+      "naicsCodes": ["333618"],
+      "classificationCode": "2815",
+      "active": "Yes",
+      "award": null,
+      "pointOfContact": [
+        {
+          "fax": null,
+          "type": "primary",
+          "email": "shepard.hicks@us.af.mil",
+          "phone": null,
+          "title": null,
+          "fullName": "Shepard Hicks"
+        },
+        {
+          "fax": "2108675309",
+          "type": "secondary",
+          "email": "brenda.rodriguez.3@us.af.mil",
+          "phone": "2108675309",
+          "title": null,
+          "fullName": "SSgt Brenda Rodriguez"
+        }
+      ],
+      "description": "https://api-alpha.sam.gov/prodlike/opportunities/v1/noticedesc?noticeid=ee48fc2a9be44ae9befc4ee7cd13d019",
+      "organizationType": "OFFICE",
+      "officeAddress": {
+        "zipcode": "78236-5286",
+        "city": "JBSA LACKLAND",
+        "countryCode": "USA",
+        "state": "TX"
+      },
+      "placeOfPerformance": {
+        "city": {
+          "code": "0",
+          "name": "Heartland"
+        },
+        "state": {
+          "code": "TX",
+          "name": "Texas"
+        },
+        "zip": "78236",
+        "country": {
+          "code": "USA",
+          "name": "UNITED STATES"
+        }
+      },
+      "additionalInfoLink": null,
+      "uiLink": "https://alpha.sam.gov/opp/ee48fc2a9be44ae9befc4ee7cd13d019/view",
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://api-alpha.sam.gov/prodlike/opportunities/v2/search?noticeid=ee48fc2a9be44ae9befc4ee7cd13d019&limit=1"
+        }
+      ],
+      "resourceLinks": [
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/1274132214f94039bf191d6551a4f81d/download"
+      ]
+    },
+    {
+      "noticeId": "ea91e1233e7049f7b68636b564941250",
+      "title": "Runway Rubber Removal",
+      "solicitationNumber": "Gomez06-FA300224R0002-RR",
+      "fullParentPathName": "DEPT OF DEFENSE.DEPT OF THE AIR FORCE.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047  802 CONS CC JBSA",
+      "fullParentPathCode": "057.5700.AETC.JBSA - LACKLAND (JOINT BASE SAN ANTONIO).FA3047",
+      "postedDate": "2024-09-19",
+      "type": "Solicitation",
+      "baseType": "Presolicitation",
+      "archiveType": "autocustom",
+      "archiveDate": "2024-10-18",
+      "typeOfSetAsideDescription": "Total Small Business Set-Aside (FAR 19.5)",
+      "typeOfSetAside": "SBA",
+      "responseDeadLine": "2024-09-23T13:30:00-05:00",
+      "naicsCode": "237310",
+      "naicsCodes": ["237310"],
+      "classificationCode": "Z2BD",
+      "active": "Yes",
+      "award": null,
+      "pointOfContact": [
+        {
+          "fax": "",
+          "type": "primary",
+          "email": "james.gomez.9@us.af.mil",
+          "phone": "",
+          "title": null,
+          "fullName": "SSgt James Gomez"
+        },
+        {
+          "fax": "",
+          "type": "secondary",
+          "email": "janmichael.bunda@us.af.mil",
+          "phone": "",
+          "title": null,
+          "fullName": "SSgt JanMichael Bunda"
+        }
+      ],
+      "description": "https://api-alpha.sam.gov/prodlike/opportunities/v1/noticedesc?noticeid=ea91e1233e7049f7b68636b564941250",
+      "organizationType": "OFFICE",
+      "officeAddress": {
+        "zipcode": "78236-5286",
+        "city": "JBSA LACKLAND",
+        "countryCode": "USA",
+        "state": "TX"
+      },
+      "placeOfPerformance": {
+        "city": {
+          "code": "0",
+          "name": "Heartland"
+        },
+        "state": {
+          "code": "TX",
+          "name": "Texas"
+        },
+        "zip": "78236",
+        "country": {
+          "code": "USA",
+          "name": "UNITED STATES"
+        }
+      },
+      "additionalInfoLink": null,
+      "uiLink": "https://alpha.sam.gov/opp/ea91e1233e7049f7b68636b564941250/view",
+      "links": [
+        {
+          "rel": "self",
+          "href": "https://api-alpha.sam.gov/prodlike/opportunities/v2/search?noticeid=ea91e1233e7049f7b68636b564941250&limit=1"
+        }
+      ],
+      "resourceLinks": [
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/239554fcd2034a50b646aa7a1eff66e6/download",
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/5a812507034c424194e1f2b3f0dc8fe1/download",
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/70ac878d26b34a8f91d63958fe9caa85/download",
+        "https://alpha.sam.gov/api/prodlike/opps/v3/opportunities/resources/files/e4339fbac7fa4157b66e32c8e0a91fd6/download"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://api-alpha.sam.gov/prodlike/opportunities/v2/search?postedFrom=08/19/2024&postedTo=11/19/2024&limit=5&offset=0"
+    }
+  ]
+}
+
+# Another example with filters
+curl -X GET "https://api-alpha.sam.gov/prodlike/opportunities/v2/search\
+?limit=1\
+&api_key={User's Public API Key}\
+&postedFrom=01/01/2018\
+&postedTo=05/10/2018\
+&ptype=a\
+&deptname=general"
+
+# Example Response
+{
+    "totalRecords": 34,
+    "limit": 1,
+    "offset": 0,
+    "opportunitiesData": [
+        {
+            "noticeId": "5b345bbb7127b91a3ad577b203fc6f68",
+            "title": "Historic Office Renovation ",
+            "solicitationNumber": " 47PF0018R0023 ",
+            "department": "GENERAL SERVICES ADMINISTRATION",
+            "subTier": "PUBLIC BUILDINGS SERVICE",
+            "office": "PBS R5",
+            "postedDate": "2018-05-04",
+            "type": "Award Notice",
+            "baseType": "Combined Synopsis/Solicitation",
+            "archiveType": "manual",
+            "archiveDate": null,
+            "typeOfSetAsideDescription": null,
+            "typeOfSetAside": null,
+            "responseDeadLine": null,
+            "naicsCode": "236220",
+            "classificationCode": "Z",
+            "active": "Yes",
+            "award": {
+                "date": "2018-05-04",
+                "number": "47PF0018C0066",
+                "amount": "800620",
+                "awardee": {
+                    "name": "D.G. Beyer, Inc.",
+                    "location": {
+                        "streetAddress": "3080 S Calhoun Rd.",
+                        "city": {
+                            "code": "56375",
+                            "name": "New Berlin"
+                        },
+                        "state": {
+                            "code": "WI"
+                        },
+                        "zip": "53151",
+                        "country": {
+                            "code": "USA"
+                        }
+                    },
+                    "ueiSAM": "025114695AST"
+
+                }
+            },
+            "pointOfContact": [
+                {
+                    "fax": null,
+                    "type": "primary",
+                    "email": "jesse.jones@gsa.gov",
+                    "phone": "2174941263",
+                    "title": "Contracting Officer ",
+                    "fullName": "Jesse L. Jones"
+                }
+            ],
+            "description": "https://api.sam.gov/prod/opportunities/v1/noticedesc?noticeid=5b345bbb7127b91a3ad577b203fc6f68",
+            "organizationType": "OFFICE",
+            "officeAddress": {
+                "zipcode": "60604",
+                "city": "CHICAGO",
+                "countryCode": "USA",
+                "state": "IL"
+            },
+            "placeOfPerformance": {
+                "streetAddress": "517 E Wisconsin Ave",
+                "city": {
+                    "code": "53000",
+                    "name": "Milwaukee"
+                },
+                "state": {
+                    "code": "WI"
+                },
+                "zip": "53202",
+                "country": {
+                    "code": "USA"
+                }
+            },
+            "additionalInfoLink": null,
+            "uiLink": "https://beta.sam.gov/opp/5b345bbb7127b91a3ad577b203fc6f68/view",
+            "links": [
+                {
+                    "rel": "self",
+                    "href": "https://api.sam.gov/prod/opportunities/v1/search?noticeid=5b345bbb7127b91a3ad577b203fc6f68&limit=1",
+                    "hreflang": null,
+                    "media": null,
+                    "title": null,
+                    "type": null,
+                    "deprecation": null
+                }
+            ]
+        }
+    ],
+    "links": [
+        {
+            "rel": "self",
+            "href": "https://api.sam.gov/prod/opportunities/v1/search?limit=1&postedFrom=01/01/2018&postedTo=05/10/2018&ptype=a&deptname=general",
+            "hreflang": null,
+            "media": null,
+            "title": null,
+            "type": null,
+            "deprecation": null
+        }
+    ]
+}

@@ -1,22 +1,37 @@
 // Main contract interface matching SAM.gov opportunities data structure
 export interface Contract {
+  // Core Identification
   noticeId: string;
   title: string;
   solicitationNumber?: string;
+  
+  // Organizational Hierarchy
   department: string;
   subTier: string;
   office: string;
+  fullParentPathName?: string;
+  fullParentPathCode?: string;
+  organizationType: string;
+  
+  // Dates and Status
   postedDate: string;
   type: string;
   baseType: string;
   archiveType: string;
   archiveDate: string | null;
+  active: "Yes" | "No";
+  responseDeadLine: string | null;
+  
+  // Classification and Codes
+  naicsCode: string;
+  naicsCodes?: string[];
+  classificationCode: string;
+  
+  // Set-Aside Information
   typeOfSetAsideDescription: string | null;
   typeOfSetAside: string | null;
-  responseDeadLine: string | null;
-  naicsCode: string;
-  classificationCode: string;
-  active: "Yes" | "No";
+  
+  // Award Information
   award?: {
     date: string;
     number: string;
@@ -39,39 +54,50 @@ export interface Contract {
       };
       ueiSAM: string;
     };
-  };
+  } | null;
+  
+  // Contact Information
   pointOfContact: Array<{
     fax: string | null;
     type: string;
     email: string;
-    phone: string;
-    title: string;
+    phone: string | null;
+    title: string | null;
     fullName: string;
   }>;
-  description: string;
-  organizationType: string;
+  
+  // Location Information
   officeAddress: {
     zipcode: string;
     city: string;
     countryCode: string;
     state: string;
   };
+  
   placeOfPerformance: {
-    streetAddress: string;
+    streetAddress?: string;
     city: {
       code: string;
       name: string;
     };
     state: {
       code: string;
+      name?: string;
     };
     zip: string;
     country: {
       code: string;
+      name?: string;
     };
   };
+  
+  // Description and Links
+  description: string;
   additionalInfoLink: string | null;
   uiLink: string;
+  resourceLinks?: string[];
+  
+  // Related Links
   links: Array<{
     rel: string;
     href: string;
