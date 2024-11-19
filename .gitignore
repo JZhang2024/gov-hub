@@ -40,3 +40,10 @@ yarn-error.log*
 next-env.d.ts
 
 openapi.yaml
+
+# Supabase local development
+supabase/config.toml
+supabase/.temp
+supabase/.branches
+
+.vscode/

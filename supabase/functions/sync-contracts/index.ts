@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.171.0/http/server.ts"
 import { format, subDays } from 'date-fns'
 
 const corsHeaders = {
