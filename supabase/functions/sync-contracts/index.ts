@@ -34,11 +34,11 @@ serve(async (req) => {
       `limit=1000&` +
       `offset=0`;
     
-      console.log('Calling SAM.gov API:', {
-        url: samUrl,
-        dates: { startDate, endDate },
-        apiKeyExists: !!Deno.env.get('SAM_API_KEY')
-      });
+    console.log('Calling SAM.gov API:', {
+      url: samUrl,
+      dates: { startDate, endDate },
+      apiKeyExists: !!Deno.env.get('SAM_API_KEY')
+    });
 
     const samResponse = await fetch(samUrl, {
       headers: {
@@ -47,14 +47,12 @@ serve(async (req) => {
       }
     });
 
-    // Log the response status
     console.log('SAM.gov response status:', {
       status: samResponse.status,
       statusText: samResponse.statusText
     });
 
     if (!samResponse.ok) {
-      // Log the error response body
       const errorText = await samResponse.text();
       console.error('SAM.gov error response:', errorText);
       throw new Error(`SAM.gov API error: ${samResponse.statusText} - ${errorText}`);
@@ -62,16 +60,16 @@ serve(async (req) => {
 
     const samData = await samResponse.json();
 
-    // Log the full response structure
-    console.log('SAM.gov response structure:', {
-      keys: Object.keys(samData),
+    console.log('SAM.gov response:', {
       totalRecords: samData.totalRecords,
-      dataLength: samData.opportunitiesData?.length,
-      firstRecord: samData.opportunitiesData?.[0] ? {
-        noticeId: samData.opportunitiesData[0].noticeId,
-        title: samData.opportunitiesData[0].title
-      } : null
+      pageSize: samData.opportunitiesData?.length,
+      dateRange: { startDate, endDate }
     });
+
+    // If there are more than 1000 records, log a warning
+    if (samData.totalRecords > 1000) {
+      console.warn(`Found ${samData.totalRecords} total records, but can only process 1000 per run. Consider implementing pagination.`);
+    }
 
     const { data, error } = await supabase.rpc('sync_sam_contracts', {
       data: samData,
@@ -87,10 +85,10 @@ serve(async (req) => {
         success: true,
         message: data,
         count: samData.opportunitiesData?.length || 0,
-        debugInfo: {
-          dateRange: { yesterday, today },
-          samResponseStatus: samResponse.status,
-          samDataKeys: Object.keys(samData)
+        totalRecords: samData.totalRecords,
+        dateRange: {
+          from: startDate,
+          to: endDate
         }
       }),
       {
