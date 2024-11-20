@@ -21,10 +21,10 @@ serve(async (req) => {
       }
     );
 
-    // Get date range: one month ago to today
+    // Get date range: x months ago to today
     const today = new Date();
-    const monthAgo = subMonths(today, 1);
-    const startDate = format(monthAgo, 'MM/dd/yyyy');
+    const xMonthsAgo = subMonths(today, 6);
+    const startDate = format(xMonthsAgo, 'MM/dd/yyyy');
     const endDate = format(today, 'MM/dd/yyyy');
 
     // Log the URL we're about to call
