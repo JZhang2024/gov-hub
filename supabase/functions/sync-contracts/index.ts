@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
 import { createClient } from 'npm:@supabase/supabase-js'
-import { format, subDays } from 'npm:date-fns';
+import { format, subMonths } from 'npm:date-fns';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,21 +21,24 @@ serve(async (req) => {
       }
     );
 
-    const yesterday = format(subDays(new Date(), 1), 'MM/dd/yyyy');
-    const today = format(new Date(), 'MM/dd/yyyy');
+    // Get date range: one month ago to today
+    const today = new Date();
+    const monthAgo = subMonths(today, 1);
+    const startDate = format(monthAgo, 'MM/dd/yyyy');
+    const endDate = format(today, 'MM/dd/yyyy');
 
     // Log the URL we're about to call
     const samUrl = `${Deno.env.get('SAM_API_URL')}?` +
-      `postedFrom=${yesterday}&` +
-      `postedTo=${today}&` +
+      `postedFrom=${startDate}&` +
+      `postedTo=${endDate}&` +
       `limit=1000&` +
       `offset=0`;
     
-    console.log('Calling SAM.gov API:', {
-      url: samUrl,
-      dates: { yesterday, today },
-      apiKeyExists: !!Deno.env.get('SAM_API_KEY')
-    });
+      console.log('Calling SAM.gov API:', {
+        url: samUrl,
+        dates: { startDate, endDate },
+        apiKeyExists: !!Deno.env.get('SAM_API_KEY')
+      });
 
     const samResponse = await fetch(samUrl, {
       headers: {
