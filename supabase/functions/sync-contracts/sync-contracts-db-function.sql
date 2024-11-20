@@ -7,6 +7,8 @@ DECLARE
   contract_record jsonb;
   new_contract_id bigint;
   department_parts text[];
+  updated_count integer := 0;
+  inserted_count integer := 0;
 BEGIN
   -- Debug input
   RAISE NOTICE 'Input data type: %', jsonb_typeof(data);
@@ -30,10 +32,6 @@ BEGIN
       RAISE NOTICE 'Posted date: %', contract_record->>'postedDate';
       RAISE NOTICE 'Response deadline: %', contract_record->>'responseDeadLine';
       RAISE NOTICE 'Archive date: %', contract_record->>'archiveDate';
-      
-      -- Debug each potentially problematic field
-      RAISE NOTICE 'resourceLinks type: %', jsonb_typeof(contract_record->'resourceLinks');
-      RAISE NOTICE 'pointOfContact type: %', jsonb_typeof(contract_record->'pointOfContact');
 
       -- Split department path into parts if it exists, otherwise use direct department fields
       IF contract_record->>'fullParentPathName' IS NOT NULL THEN
@@ -119,85 +117,129 @@ BEGIN
       )
       ON CONFLICT (notice_id) DO UPDATE SET
         title = EXCLUDED.title,
+        solicitation_number = EXCLUDED.solicitation_number,
+        department = EXCLUDED.department,
+        sub_tier = EXCLUDED.sub_tier,
+        office = EXCLUDED.office,
+        posted_date = EXCLUDED.posted_date,
+        type = EXCLUDED.type,
+        base_type = EXCLUDED.base_type,
+        archive_type = EXCLUDED.archive_type,
+        archive_date = EXCLUDED.archive_date,
+        set_aside_description = EXCLUDED.set_aside_description,
+        set_aside_code = EXCLUDED.set_aside_code,
+        response_deadline = EXCLUDED.response_deadline,
+        naics_code = EXCLUDED.naics_code,
+        classification_code = EXCLUDED.classification_code,
+        active = EXCLUDED.active,
+        description = EXCLUDED.description,
+        organization_type = EXCLUDED.organization_type,
+        ui_link = EXCLUDED.ui_link,
+        award = EXCLUDED.award,
+        resource_links = EXCLUDED.resource_links,
         updated_at = now(),
         last_sync_at = now()
+      WHERE
+        contracts.title != EXCLUDED.title OR
+        contracts.solicitation_number IS DISTINCT FROM EXCLUDED.solicitation_number OR
+        contracts.department IS DISTINCT FROM EXCLUDED.department OR
+        contracts.sub_tier IS DISTINCT FROM EXCLUDED.sub_tier OR
+        contracts.office IS DISTINCT FROM EXCLUDED.office OR
+        contracts.posted_date IS DISTINCT FROM EXCLUDED.posted_date OR
+        contracts.type IS DISTINCT FROM EXCLUDED.type OR
+        contracts.base_type IS DISTINCT FROM EXCLUDED.base_type OR
+        contracts.archive_type IS DISTINCT FROM EXCLUDED.archive_type OR
+        contracts.archive_date IS DISTINCT FROM EXCLUDED.archive_date OR
+        contracts.set_aside_description IS DISTINCT FROM EXCLUDED.set_aside_description OR
+        contracts.set_aside_code IS DISTINCT FROM EXCLUDED.set_aside_code OR
+        contracts.response_deadline IS DISTINCT FROM EXCLUDED.response_deadline OR
+        contracts.naics_code IS DISTINCT FROM EXCLUDED.naics_code OR
+        contracts.classification_code IS DISTINCT FROM EXCLUDED.classification_code OR
+        contracts.active IS DISTINCT FROM EXCLUDED.active OR
+        contracts.description IS DISTINCT FROM EXCLUDED.description OR
+        contracts.organization_type IS DISTINCT FROM EXCLUDED.organization_type OR
+        contracts.ui_link IS DISTINCT FROM EXCLUDED.ui_link OR
+        contracts.award IS DISTINCT FROM EXCLUDED.award OR
+        contracts.resource_links IS DISTINCT FROM EXCLUDED.resource_links
       RETURNING id INTO new_contract_id;
 
-      -- Handle addresses
-      -- First, delete existing addresses for this contract
-      DELETE FROM contract_addresses WHERE contract_id = new_contract_id;
-      
-      -- Insert office address
-      IF (contract_record->'officeAddress') IS NOT NULL THEN
-        INSERT INTO contract_addresses (
-          contract_id,
-          address_type,
-          city,
-          state,
-          zip,
-          country_code
-        ) VALUES (
-          new_contract_id,
-          'office',
-          contract_record->'officeAddress'->>'city',
-          contract_record->'officeAddress'->>'state',
-          contract_record->'officeAddress'->>'zipcode',
-          contract_record->'officeAddress'->>'countryCode'
-        );
-      END IF;
+      -- If we got new_contract_id, it means either insert or update happened
+      IF FOUND THEN
+        -- Handle addresses
+        DELETE FROM contract_addresses WHERE contract_id = new_contract_id;
+        
+        -- Insert office address
+        IF (contract_record->'officeAddress') IS NOT NULL THEN
+          INSERT INTO contract_addresses (
+            contract_id,
+            address_type,
+            city,
+            state,
+            zip,
+            country_code
+          ) VALUES (
+            new_contract_id,
+            'office',
+            contract_record->'officeAddress'->>'city',
+            contract_record->'officeAddress'->>'state',
+            contract_record->'officeAddress'->>'zipcode',
+            contract_record->'officeAddress'->>'countryCode'
+          );
+        END IF;
 
-      -- Insert place of performance
-      IF (contract_record->'placeOfPerformance') IS NOT NULL THEN
-        INSERT INTO contract_addresses (
-          contract_id,
-          address_type,
-          street_address,
-          city,
-          city_code,
-          state,
-          state_code,
-          zip,
-          country_code
-        ) VALUES (
-          new_contract_id,
-          'performance',
-          contract_record->'placeOfPerformance'->>'streetAddress',
-          contract_record->'placeOfPerformance'->'city'->>'name',
-          contract_record->'placeOfPerformance'->'city'->>'code',
-          contract_record->'placeOfPerformance'->'state'->>'name',
-          contract_record->'placeOfPerformance'->'state'->>'code',
-          contract_record->'placeOfPerformance'->>'zip',
-          contract_record->'placeOfPerformance'->'country'->>'code'
-        );
-      END IF;
+        -- Insert place of performance
+        IF (contract_record->'placeOfPerformance') IS NOT NULL THEN
+          INSERT INTO contract_addresses (
+            contract_id,
+            address_type,
+            street_address,
+            city,
+            city_code,
+            state,
+            state_code,
+            zip,
+            country_code
+          ) VALUES (
+            new_contract_id,
+            'performance',
+            contract_record->'placeOfPerformance'->>'streetAddress',
+            contract_record->'placeOfPerformance'->'city'->>'name',
+            contract_record->'placeOfPerformance'->'city'->>'code',
+            contract_record->'placeOfPerformance'->'state'->>'name',
+            contract_record->'placeOfPerformance'->'state'->>'code',
+            contract_record->'placeOfPerformance'->>'zip',
+            contract_record->'placeOfPerformance'->'country'->>'code'
+          );
+        END IF;
 
-      -- Handle contacts
-      -- First, delete existing contacts for this contract
-      DELETE FROM contract_contacts WHERE contract_id = new_contract_id;
-      
-      -- Insert new contacts if they exist
-      IF (contract_record->'pointOfContact') IS NOT NULL THEN
-        INSERT INTO contract_contacts (
-          contract_id,
-          contact_type,
-          full_name,
-          title,
-          email,
-          phone,
-          fax
-        )
-        SELECT
-          new_contract_id,
-          contact->>'type',
-          contact->>'fullName',
-          contact->>'title',
-          contact->>'email',
-          contact->>'phone',
-          contact->>'fax'
-        FROM jsonb_array_elements(contract_record->'pointOfContact') AS contact;
+        -- Handle contacts
+        DELETE FROM contract_contacts WHERE contract_id = new_contract_id;
+        
+        -- Insert new contacts if they exist
+        IF (contract_record->'pointOfContact') IS NOT NULL THEN
+          INSERT INTO contract_contacts (
+            contract_id,
+            contact_type,
+            full_name,
+            title,
+            email,
+            phone,
+            fax
+          )
+          SELECT
+            new_contract_id,
+            contact->>'type',
+            contact->>'fullName',
+            contact->>'title',
+            contact->>'email',
+            contact->>'phone',
+            contact->>'fax'
+          FROM jsonb_array_elements(contract_record->'pointOfContact') AS contact;
+        END IF;
       END IF;
 
     END LOOP;
+
   EXCEPTION WHEN OTHERS THEN
     RAISE NOTICE 'Error in loop. Last record processed: %', contract_record;
     RAISE NOTICE 'Error detail: %', SQLERRM;
