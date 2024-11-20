@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
-import { createClient } from 'npm:@supabase/supabase-js'
+import { createClient } from 'npm:@supabase/supabase-js';
 import { format, subMonths } from 'npm:date-fns';
 
 const corsHeaders = {
@@ -33,7 +33,7 @@ serve(async (req) => {
       `postedTo=${endDate}&` +
       `limit=1000&` +
       `offset=0`;
-    
+
     console.log('Calling SAM.gov API:', {
       url: samUrl,
       dates: { startDate, endDate },
@@ -57,19 +57,23 @@ serve(async (req) => {
       console.error('SAM.gov error response:', errorText);
       throw new Error(`SAM.gov API error: ${samResponse.statusText} - ${errorText}`);
     }
-
+4
     const samData = await samResponse.json();
 
-    console.log('SAM.gov response:', {
-      totalRecords: samData.totalRecords,
-      pageSize: samData.opportunitiesData?.length,
-      dateRange: { startDate, endDate }
+    // Debug log the exact structure
+    console.log('Data structure:', {
+      type: typeof samData,
+      hasOpportunities: 'opportunitiesData' in samData,
+      opportunitiesType: typeof samData.opportunitiesData,
+      isArray: Array.isArray(samData.opportunitiesData),
+      sampleData: samData.opportunitiesData?.[0]
+        ? {
+            noticeId: samData.opportunitiesData[0].noticeId,
+            hasResourceLinks: 'resourceLinks' in samData.opportunitiesData[0],
+            resourceLinksType: typeof samData.opportunitiesData[0].resourceLinks
+          }
+        : null
     });
-
-    // If there are more than 1000 records, log a warning
-    if (samData.totalRecords > 1000) {
-      console.warn(`Found ${samData.totalRecords} total records, but can only process 1000 per run. Consider implementing pagination.`);
-    }
 
     const { data, error } = await supabase.rpc('sync_sam_contracts', {
       data: samData,
