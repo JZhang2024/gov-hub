@@ -25,27 +25,52 @@ interface ContractDetailProps {
 const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
   const [tab, setTab] = useState("overview");
 
+  // Helper to safely get nested award properties
+  const getAwardInfo = () => {
+    if (!contract.award) return null;
+    
+    const { award } = contract;
+    return {
+      awardee: award.awardee?.name || 'Not specified',
+      date: award.date || 'Not specified',
+      amount: award.amount ? formatCurrency(award.amount) : 'Not specified',
+      ueiSAM: award.awardee?.ueiSAM || 'Not specified',
+      location: award.awardee?.location ? {
+        street: award.awardee.location.streetAddress || '',
+        city: award.awardee.location.city?.name || '',
+        state: award.awardee.location.state?.code || '',
+        zip: award.awardee.location.zip || '',
+      } : null
+    };
+  };
+
   // Helper to format contact info display
-  const formatContact = (poc: Contract['pointOfContact'][0]) => (
-    <div className="space-y-1">
-      <div className="font-medium">{poc.fullName}</div>
-      {poc.title && <div className="text-gray-600">{poc.title}</div>}
-      <div className="flex items-center gap-4">
-        {poc.email && (
-          <a href={`mailto:${poc.email}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
-            <Mail className="h-4 w-4" />
-            <span>Email</span>
-          </a>
-        )}
-        {poc.phone && (
-          <a href={`tel:${poc.phone}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
-            <Phone className="h-4 w-4" />
-            <span>Call</span>
-          </a>
-        )}
+  const formatContact = (poc: Contract['pointOfContact'][0]) => {
+    if (!poc) return null;
+    
+    return (
+      <div className="space-y-1">
+        <div className="font-medium">{poc.fullName || 'Name not specified'}</div>
+        {poc.title && <div className="text-gray-600">{poc.title}</div>}
+        <div className="flex items-center gap-4">
+          {poc.email && (
+            <a href={`mailto:${poc.email}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <Mail className="h-4 w-4" />
+              <span>Email</span>
+            </a>
+          )}
+          {poc.phone && (
+            <a href={`tel:${poc.phone}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+              <Phone className="h-4 w-4" />
+              <span>Call</span>
+            </a>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const awardInfo = getAwardInfo();
 
   return (
     <div className="border-t">
@@ -92,7 +117,7 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
                 {contract.typeOfSetAsideDescription ? (
                   <>
                     <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                      {contract.typeOfSetAside}
+                      {contract.typeOfSetAside || 'Not specified'}
                     </Badge>
                     <div className="text-gray-600 mt-2">
                       {contract.typeOfSetAsideDescription}
@@ -104,7 +129,7 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
               </div>
             </Card>
 
-            {contract.pointOfContact.length > 0 && (
+            {contract.pointOfContact?.[0] && (
               <Card className="p-4 bg-gray-50">
                 <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
                   <FileText className="h-4 w-4" />
@@ -124,11 +149,11 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">NAICS:</span>
-                  <span className="font-medium">{contract.naicsCode}</span>
+                  <span className="font-medium">{contract.naicsCode || 'Not specified'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Classification Code:</span>
-                  <span className="font-medium">{contract.classificationCode}</span>
+                  <span className="font-medium">{contract.classificationCode || 'Not specified'}</span>
                 </div>
               </div>
             </Card>
@@ -166,7 +191,7 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
               </Card>
             </div>
 
-            {contract.award && (
+            {awardInfo && (
               <div>
                 <h4 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
                   <Award className="h-4 w-4" />
@@ -176,20 +201,33 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
                   <dl className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <dt className="text-gray-600">Awardee</dt>
-                      <dd className="font-medium">{contract.award.awardee.name}</dd>
+                      <dd className="font-medium">{awardInfo.awardee}</dd>
                     </div>
                     <div>
                       <dt className="text-gray-600">Award Date</dt>
-                      <dd className="font-medium">{formatDate(contract.award.date)}</dd>
+                      <dd className="font-medium">{formatDate(awardInfo.date)}</dd>
                     </div>
                     <div>
                       <dt className="text-gray-600">Award Amount</dt>
-                      <dd className="font-medium">{formatCurrency(contract.award.amount)}</dd>
+                      <dd className="font-medium">{awardInfo.amount}</dd>
                     </div>
                     <div>
                       <dt className="text-gray-600">UEI</dt>
-                      <dd className="font-medium">{contract.award.awardee.ueiSAM}</dd>
+                      <dd className="font-medium">{awardInfo.ueiSAM}</dd>
                     </div>
+                    {awardInfo.location && (
+                      <div className="col-span-2">
+                        <dt className="text-gray-600">Awardee Location</dt>
+                        <dd className="font-medium">
+                          {[
+                            awardInfo.location.street,
+                            awardInfo.location.city,
+                            awardInfo.location.state,
+                            awardInfo.location.zip
+                          ].filter(Boolean).join(', ')}
+                        </dd>
+                      </div>
+                    )}
                   </dl>
                 </Card>
               </div>
@@ -205,16 +243,24 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
                   <div>
                     <dt className="text-gray-600">Office Address</dt>
                     <dd className="font-medium space-y-1">
-                      <div>{contract.officeAddress.city}</div>
-                      <div>{contract.officeAddress.state}, {contract.officeAddress.zipcode}</div>
+                      <div>{contract.officeAddress?.city || 'Not specified'}</div>
+                      <div>
+                        {contract.officeAddress?.state && contract.officeAddress?.zipcode
+                          ? `${contract.officeAddress.state}, ${contract.officeAddress.zipcode}`
+                          : 'Not specified'
+                        }
+                      </div>
                     </dd>
                   </div>
                   <div>
                     <dt className="text-gray-600">Place of Performance</dt>
                     <dd className="font-medium space-y-1">
-                      <div>{contract.placeOfPerformance.city.name}</div>
+                      <div>{contract.placeOfPerformance?.city?.name || 'Not specified'}</div>
                       <div>
-                        {contract.placeOfPerformance.state.code}, {contract.placeOfPerformance.zip}
+                        {contract.placeOfPerformance?.state?.code && contract.placeOfPerformance?.zip
+                          ? `${contract.placeOfPerformance.state.code}, ${contract.placeOfPerformance.zip}`
+                          : 'Not specified'
+                        }
                       </div>
                     </dd>
                   </div>
