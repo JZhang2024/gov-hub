@@ -282,3 +282,61 @@ export interface UserEvent {
   data: any;
   timestamp: string;
 }
+
+export type DatabaseContract = {
+  id: number;
+  notice_id: string;
+  title: string;
+  solicitation_number: string | null;
+  department: string | null;
+  sub_tier: string | null;
+  office: string | null;
+  posted_date: string;
+  type: string;
+  base_type: string;
+  archive_type: string;
+  archive_date: string | null;
+  set_aside_description: string | null;
+  set_aside_code: string | null;
+  response_deadline: string | null;
+  naics_code: string;
+  classification_code: string;
+  active: boolean;
+  description: string | null;
+  organization_type: string;
+  ui_link: string;
+  award: any; // Keep as any since it's a JSONB field
+  resource_links: string[] | null;
+  created_at: string;
+  updated_at: string;
+  last_sync_at: string;
+  contract_addresses: DatabaseAddress[];
+  contract_contacts: DatabaseContact[];
+};
+
+export type DatabaseAddress = {
+  id: number;
+  contract_id: number;
+  address_type: 'office' | 'performance';
+  street_address: string | null;
+  city: string | null;
+  city_code: string | null;
+  state: string | null;
+  state_code: string | null;
+  zip: string | null;
+  country: string | null;
+  country_code: string | null;
+  created_at: string;
+};
+
+export type DatabaseContact = {
+  id: number;
+  contract_id: number;
+  contact_type: string;
+  full_name: string | null;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  fax: string | null;
+  created_at: string;
+};
