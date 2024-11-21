@@ -1,13 +1,72 @@
-// lib/supabase/contracts.ts
 import { createClient } from '@supabase/supabase-js';
 import type { Contract } from '@/types/contracts';
-import type { DatabaseContract } from '@/types/contracts';
 
+// Database types
+type DatabaseContract = {
+  id: number;
+  notice_id: string;
+  title: string;
+  solicitation_number: string | null;
+  department: string | null;
+  sub_tier: string | null;
+  office: string | null;
+  posted_date: string;
+  type: string;
+  base_type: string;
+  archive_type: string;
+  archive_date: string | null;
+  set_aside_description: string | null;
+  set_aside_code: string | null;
+  response_deadline: string | null;
+  naics_code: string;
+  classification_code: string;
+  active: boolean;
+  description: string | null;
+  organization_type: string;
+  ui_link: string;
+  award: any;
+  resource_links: string[] | null;
+  created_at: string;
+  updated_at: string;
+  last_sync_at: string;
+  contract_addresses: DatabaseAddress[];
+  contract_contacts: DatabaseContact[];
+};
+
+type DatabaseAddress = {
+  id: number;
+  contract_id: number;
+  address_type: 'office' | 'performance';
+  street_address: string | null;
+  city: string | null;
+  city_code: string | null;
+  state: string | null;
+  state_code: string | null;
+  zip: string | null;
+  country: string | null;
+  country_code: string | null;
+  created_at: string;
+};
+
+type DatabaseContact = {
+  id: number;
+  contract_id: number;
+  contact_type: string;
+  full_name: string | null;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  fax: string | null;
+  created_at: string;
+};
+
+// Create Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Response and filter types
 export type ContractsResponse = {
   data: Contract[];
   count: number;
@@ -24,8 +83,10 @@ export type ContractFilters = {
     start: Date;
     end: Date;
   };
+  sortOrder?: 'asc' | 'desc';
 };
 
+// Transform database contract to frontend contract type
 const transformDatabaseContract = (contract: DatabaseContract): Contract => {
   const officeAddr = contract.contract_addresses.find(
     addr => addr.address_type === 'office'
@@ -42,7 +103,9 @@ const transformDatabaseContract = (contract: DatabaseContract): Contract => {
     fullParentPathName: [contract.department, contract.sub_tier, contract.office]
       .filter(Boolean)
       .join('.'),
-    fullParentPathCode: '', // Add if you have this in your database
+    fullParentPathCode: [contract.department, contract.sub_tier, contract.office]
+      .filter(Boolean)
+      .join('.'),
     postedDate: contract.posted_date,
     type: contract.type,
     baseType: contract.base_type,
@@ -107,6 +170,7 @@ const transformDatabaseContract = (contract: DatabaseContract): Contract => {
   };
 };
 
+// Main fetch function
 export const getContracts = async (
   page: number = 1,
   pageSize: number = 10,
@@ -171,11 +235,14 @@ export const getContracts = async (
         .lte('posted_date', filters.dateRange.end.toISOString());
     }
 
+    // Apply sorting - default to newest first
+    query = query.order('posted_date', {
+      ascending: filters?.sortOrder === 'asc'
+    });
+
     // Apply pagination
     const start = (page - 1) * pageSize;
-    query = query
-      .order('posted_date', { ascending: false })
-      .range(start, start + pageSize - 1);
+    query = query.range(start, start + pageSize - 1);
 
     const { data, error, count } = await query;
 

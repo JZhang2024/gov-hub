@@ -1,18 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowDownWideNarrow } from 'lucide-react'; 
+import { ArrowDownWideNarrow } from 'lucide-react';
 import ContractHeader from './ContractHeader';
 import SearchBar from './SearchBar';
 import ContractRow from './ContractRow';
 import PaginationControls from './PaginationControls';
 import { getContracts } from '@/lib/supabase/contracts';
-import { Contract } from '@/types/contracts';
+import type { Contract } from '@/types/contracts';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
-const ITEMS_PER_PAGE = 25; // Increased from 10 to 25
 
-const ContractList = () => {
+export type SearchBarProps = {
+  onSearch: (query: string) => void;
+  onFilter: () => void;
+  onExport: () => void;
+};
+
+export type PaginationControlsProps = {
+  currentPage: number;
+  totalPages: number;
+  startIndex: number;
+  endIndex: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+};
+
+export type ContractRowProps = {
+  contract: Contract;
+  isExpanded: boolean;
+  onToggle: () => void;
+};
+
+
+const ITEMS_PER_PAGE = 25;
+
+export default function ContractList() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +54,7 @@ const ContractList = () => {
       try {
         const { data, count, error } = await getContracts(currentPage, ITEMS_PER_PAGE, {
           search: searchQuery || undefined,
+          sortOrder: sortOrder,
         });
         
         if (error) throw error;
@@ -47,12 +72,11 @@ const ContractList = () => {
 
     const timer = setTimeout(fetchContracts, searchQuery ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [currentPage, searchQuery]);
+  }, [currentPage, searchQuery, sortOrder]);
 
   const handlePageChange = (page: number) => {
     setExpandedId(null);
     setCurrentPage(page);
-    // Scroll to top of list when page changes
     document.getElementById('contract-list-top')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -60,6 +84,23 @@ const ContractList = () => {
     setSearchQuery(query);
     setCurrentPage(1);
     setExpandedId(null);
+  };
+
+  const handleSortChange = () => {
+    const newOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+    setSortOrder(newOrder);
+    setCurrentPage(1);
+    setExpandedId(null);
+  };
+
+  const handleFilter = () => {
+    // TODO: Implement filtering
+    console.log('Filter clicked');
+  };
+
+  const handleExport = () => {
+    // TODO: Implement export
+    console.log('Export clicked');
   };
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
@@ -72,16 +113,19 @@ const ContractList = () => {
       
       <SearchBar 
         onSearch={handleSearch}
-        onFilter={() => {}} // TODO: Implement filtering
-        onExport={() => {}} // TODO: Implement export
+        onFilter={handleFilter}
+        onExport={handleExport}
       />
 
-      <div id="contract-list-top" className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      <Card id="contract-list-top" className="overflow-hidden">
         <div className="bg-gradient-to-r from-gray-50 to-white p-4 border-b">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               {isLoading ? (
-                'Loading contracts...'
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-r-transparent"></div>
+                  Loading contracts...
+                </div>
               ) : error ? (
                 <span className="text-red-600">Error: {error}</span>
               ) : (
@@ -98,14 +142,15 @@ const ContractList = () => {
               )}
             </div>
             
-            {!isLoading && !error && contracts.length > 0 && (
+            {!error && contracts.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">Sort by date:</span>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                  onClick={handleSortChange}
                   className="gap-2"
+                  disabled={isLoading}
                 >
                   <ArrowDownWideNarrow className={`h-4 w-4 transition-transform ${
                     sortOrder === 'asc' ? 'rotate-180' : ''
@@ -161,9 +206,7 @@ const ContractList = () => {
             onPageChange={handlePageChange}
           />
         )}
-      </div>
+      </Card>
     </div>
   );
-};
-
-export default ContractList;
+}

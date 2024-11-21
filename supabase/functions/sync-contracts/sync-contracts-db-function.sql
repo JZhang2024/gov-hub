@@ -215,8 +215,9 @@ BEGIN
         -- Handle contacts
         DELETE FROM contract_contacts WHERE contract_id = new_contract_id;
         
-        -- Insert new contacts if they exist
-        IF (contract_record->'pointOfContact') IS NOT NULL THEN
+        -- Insert new contacts if they exist and are in the correct format
+        IF (contract_record->'pointOfContact') IS NOT NULL AND 
+           jsonb_typeof(contract_record->'pointOfContact') = 'array' THEN
           INSERT INTO contract_contacts (
             contract_id,
             contact_type,
@@ -235,6 +236,26 @@ BEGIN
             contact->>'phone',
             contact->>'fax'
           FROM jsonb_array_elements(contract_record->'pointOfContact') AS contact;
+        ELSIF (contract_record->'pointOfContact') IS NOT NULL AND 
+              jsonb_typeof(contract_record->'pointOfContact') = 'object' THEN
+          -- Handle single contact object case
+          INSERT INTO contract_contacts (
+            contract_id,
+            contact_type,
+            full_name,
+            title,
+            email,
+            phone,
+            fax
+          ) VALUES (
+            new_contract_id,
+            contract_record->'pointOfContact'->>'type',
+            contract_record->'pointOfContact'->>'fullName',
+            contract_record->'pointOfContact'->>'title',
+            contract_record->'pointOfContact'->>'email',
+            contract_record->'pointOfContact'->>'phone',
+            contract_record->'pointOfContact'->>'fax'
+          );
         END IF;
       END IF;
 
