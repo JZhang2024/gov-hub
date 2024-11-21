@@ -157,7 +157,7 @@ export interface PaginationProps {
 export interface SearchFilters {
   setAside?: SetAsideType[];
   type?: ContractType[];
-  status?: ContractStatus[];
+  status?: ContractStatus[];  // Changed from single status to array
   agency?: string[];
   dateRange?: {
     start: string;

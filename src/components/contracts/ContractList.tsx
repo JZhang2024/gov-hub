@@ -6,33 +6,12 @@ import ContractHeader from './ContractHeader';
 import SearchBar from './SearchBar';
 import ContractRow from './ContractRow';
 import PaginationControls from './PaginationControls';
+import FilterDialog from './FilterDialog';
 import { getContracts } from '@/lib/supabase/contracts';
-import type { Contract } from '@/types/contracts';
+import type { Contract, SearchFilters } from '@/types/contracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
-
-export type SearchBarProps = {
-  onSearch: (query: string) => void;
-  onFilter: () => void;
-  onExport: () => void;
-};
-
-export type PaginationControlsProps = {
-  currentPage: number;
-  totalPages: number;
-  startIndex: number;
-  endIndex: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
-};
-
-export type ContractRowProps = {
-  contract: Contract;
-  isExpanded: boolean;
-  onToggle: () => void;
-};
-
+import { Badge } from '@/components/ui/badge';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -45,6 +24,8 @@ export default function ContractList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<SearchFilters>({});
 
   useEffect(() => {
     const fetchContracts = async () => {
@@ -54,7 +35,8 @@ export default function ContractList() {
       try {
         const { data, count, error } = await getContracts(currentPage, ITEMS_PER_PAGE, {
           search: searchQuery || undefined,
-          sortOrder: sortOrder,
+          sortOrder,
+          filters,
         });
         
         if (error) throw error;
@@ -72,7 +54,7 @@ export default function ContractList() {
 
     const timer = setTimeout(fetchContracts, searchQuery ? 300 : 0);
     return () => clearTimeout(timer);
-  }, [currentPage, searchQuery, sortOrder]);
+  }, [currentPage, searchQuery, sortOrder, filters]);
 
   const handlePageChange = (page: number) => {
     setExpandedId(null);
@@ -94,8 +76,19 @@ export default function ContractList() {
   };
 
   const handleFilter = () => {
-    // TODO: Implement filtering
-    console.log('Filter clicked');
+    setShowFilters(true);
+  };
+
+  const handleApplyFilters = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+    setExpandedId(null);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    setCurrentPage(1);
+    setExpandedId(null);
   };
 
   const handleExport = () => {
@@ -107,6 +100,19 @@ export default function ContractList() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
 
+  // Helper to format filter badge text
+  const getFilterCount = () => {
+    let count = 0;
+    if (filters.type?.length) count += filters.type.length;
+    if (filters.setAside?.length) count += filters.setAside.length;
+    if (filters.status?.length) count += filters.status.length;
+    if (filters.dateRange?.start || filters.dateRange?.end) count += 1;
+    if (filters.valueRange?.min || filters.valueRange?.max) count += 1;
+    return count;
+  };
+
+  const filterCount = getFilterCount();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8">
       <ContractHeader />
@@ -115,6 +121,7 @@ export default function ContractList() {
         onSearch={handleSearch}
         onFilter={handleFilter}
         onExport={handleExport}
+        filterCount={filterCount}
       />
 
       <Card id="contract-list-top" className="overflow-hidden">
@@ -133,11 +140,26 @@ export default function ContractList() {
                   <div className="font-medium">
                     Showing {startIndex + 1}-{endIndex} of {totalItems} opportunities
                   </div>
-                  {searchQuery && (
-                    <div className="text-xs text-gray-500">
-                      Search results for: "{searchQuery}"
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    {searchQuery && (
+                      <div>
+                        Search: "{searchQuery}"
+                      </div>
+                    )}
+                    {filterCount > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span>•</span>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="h-auto p-0 text-xs"
+                          onClick={handleClearFilters}
+                        >
+                          Clear {filterCount} filter{filterCount !== 1 ? 's' : ''}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -175,7 +197,7 @@ export default function ContractList() {
         ) : contracts.length === 0 ? (
           <div className="p-8 text-center">
             <div className="text-gray-500 font-medium mb-2">No contracts found</div>
-            {searchQuery && (
+            {(searchQuery || filterCount > 0) && (
               <div className="text-sm text-gray-500">
                 Try adjusting your search terms or filters
               </div>
@@ -207,6 +229,14 @@ export default function ContractList() {
           />
         )}
       </Card>
+
+      <FilterDialog 
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        initialFilters={filters}
+        onApplyFilters={handleApplyFilters}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

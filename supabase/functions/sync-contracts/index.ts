@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.171.0/http/server.ts";
 import { createClient } from 'npm:@supabase/supabase-js';
-import { format, subMonths } from 'npm:date-fns';
+import { format, subMonths, subDays} from 'npm:date-fns';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,9 +23,10 @@ serve(async (req) => {
 
     // Get date range: x months ago to today
     const today = new Date();
+    const fiveDaysAgo = subDays(today, 5);
     const xMonthsAgo = subMonths(today, 6);
     const startDate = format(xMonthsAgo, 'MM/dd/yyyy');
-    const endDate = format(today, 'MM/dd/yyyy');
+    const endDate = format(fiveDaysAgo, 'MM/dd/yyyy');
 
     // Log the URL we're about to call
     const samUrl = `${Deno.env.get('SAM_API_URL')}?` +

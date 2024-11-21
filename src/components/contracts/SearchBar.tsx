@@ -1,9 +1,17 @@
 import { Search, Filter, Download } from 'lucide-react';
-import { SearchBarProps } from '@/types/contracts';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-const SearchBar = ({ onSearch, onFilter, onExport }: SearchBarProps) => {
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+  onFilter: () => void;
+  onExport: () => void;
+  filterCount: number;
+}
+
+const SearchBar = ({ onSearch, onFilter, onExport, filterCount }: SearchBarProps) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-8 flex flex-wrap gap-4 items-center border border-gray-100">
+    <div className="bg-white rounded-xl shadow-lg p-4 mb-8 flex flex-wrap gap-4 items-center">
       <div className="flex-1 min-w-[300px] relative">
         <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
         <input
@@ -14,21 +22,27 @@ const SearchBar = ({ onSearch, onFilter, onExport }: SearchBarProps) => {
         />
       </div>
       
-      <button 
+      <Button
+        variant={filterCount > 0 ? "default" : "outline"}
         onClick={onFilter}
-        className="flex items-center gap-2 px-6 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        className="gap-2"
       >
-        <Filter className="h-5 w-5 text-gray-500" />
+        <Filter className="h-4 w-4" />
         Filters
-      </button>
+        {filterCount > 0 && (
+          <Badge variant="secondary" className="ml-1">
+            {filterCount}
+          </Badge>
+        )}
+      </Button>
       
-      <button 
+      <Button
         onClick={onExport}
-        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+        className="gap-2"
       >
-        <Download className="h-5 w-5" />
+        <Download className="h-4 w-4" />
         Export
-      </button>
+      </Button>
     </div>
   );
 };
