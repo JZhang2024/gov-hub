@@ -33,6 +33,11 @@ interface FilterDialogProps {
   isLoading?: boolean;
 }
 
+interface SetAsideOption {
+  code: SetAsideType;
+  label: string;
+}
+
 const contractTypes: ContractType[] = [
   'Solicitation',
   'Award Notice',
@@ -47,14 +52,25 @@ const contractTypes: ContractType[] = [
   'Sources Sought'
 ];
 
-const setAsideTypes: SetAsideType[] = [
-  'Small Business',
-  '8(a)',
-  'HUBZone',
-  'Service-Disabled Veteran-Owned Small Business',
-  'Women-Owned Small Business',
-  'Economically Disadvantaged Women-Owned Small Business',
-  'Multiple Small Business Categories'
+const setAsideTypes: SetAsideOption[] = [
+  { code: 'SBA', label: 'Total Small Business Set-Aside' },
+  { code: 'SBP', label: 'Partial Small Business Set-Aside' },
+  { code: '8A', label: '8(a) Set-Aside' },
+  { code: '8AN', label: '8(a) Sole Source' },
+  { code: 'HZC', label: 'HUBZone Set-Aside' },
+  { code: 'HZS', label: 'HUBZone Sole Source' },
+  { code: 'SDVOSBC', label: 'Service-Disabled Veteran-Owned Small Business Set-Aside' },
+  { code: 'SDVOSBS', label: 'Service-Disabled Veteran-Owned Small Business Sole Source' },
+  { code: 'WOSB', label: 'Women-Owned Small Business Program Set-Aside' },
+  { code: 'WOSBSS', label: 'Women-Owned Small Business Program Sole Source' },
+  { code: 'EDWOSB', label: 'Economically Disadvantaged WOSB Program Set-Aside' },
+  { code: 'EDWOSBSS', label: 'Economically Disadvantaged WOSB Program Sole Source' },
+  { code: 'LAS', label: 'Local Area Set-Aside' },
+  { code: 'IEE', label: 'Indian Economic Enterprise Set-Aside' },
+  { code: 'ISBEE', label: 'Indian Small Business Economic Enterprise Set-Aside' },
+  { code: 'BICiv', label: 'Buy Indian Set-Aside' },
+  { code: 'VSA', label: 'Veteran-Owned Small Business Set-Aside' },
+  { code: 'VSS', label: 'Veteran-Owned Small Business Sole Source' }
 ];
 
 const statusOptions: ContractStatus[] = [
@@ -205,12 +221,12 @@ const FilterDialog = ({
               <div className="flex flex-wrap gap-2">
                 {setAsideTypes.map((type) => (
                   <Badge
-                    key={type}
-                    variant={selectedSetAsides.includes(type) ? "default" : "outline"}
+                    key={type.code}
+                    variant={selectedSetAsides.includes(type.code) ? "default" : "outline"}
                     className="cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSetAsideToggle(type)}
+                    onClick={() => handleSetAsideToggle(type.code)}
                   >
-                    {type}
+                    {type.label}
                   </Badge>
                 ))}
               </div>

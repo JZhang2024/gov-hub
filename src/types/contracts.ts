@@ -289,14 +289,24 @@ export type ContractType =
   | 'Sources Sought';
 
 export type SetAsideType = 
-  | 'Small Business'
-  | '8(a)'
-  | 'HUBZone'
-  | 'Service-Disabled Veteran-Owned Small Business'
-  | 'Women-Owned Small Business'
-  | 'Economically Disadvantaged Women-Owned Small Business'
-  | 'Multiple Small Business Categories'
-  | 'None';
+  | 'SBA'   // Total Small Business Set-Aside
+  | 'SBP'   // Partial Small Business Set-Aside
+  | '8A'    // 8(a) Set-Aside
+  | '8AN'   // 8(a) Sole Source
+  | 'HZC'   // HUBZone Set-Aside
+  | 'HZS'   // HUBZone Sole Source
+  | 'SDVOSBC'  // Service-Disabled Veteran-Owned Small Business Set-Aside
+  | 'SDVOSBS'  // Service-Disabled Veteran-Owned Small Business Sole Source
+  | 'WOSB'     // Women-Owned Small Business Program Set-Aside
+  | 'WOSBSS'   // Women-Owned Small Business Program Sole Source
+  | 'EDWOSB'   // Economically Disadvantaged WOSB Program Set-Aside
+  | 'EDWOSBSS' // Economically Disadvantaged WOSB Program Sole Source
+  | 'LAS'      // Local Area Set-Aside
+  | 'IEE'      // Indian Economic Enterprise Set-Aside
+  | 'ISBEE'    // Indian Small Business Economic Enterprise Set-Aside
+  | 'BICiv'    // Buy Indian Set-Aside
+  | 'VSA'      // Veteran-Owned Small Business Set-Aside
+  | 'VSS';     // Veteran-Owned Small Business Sole Source
 
 export type SortOption = 
   | 'relevance'
