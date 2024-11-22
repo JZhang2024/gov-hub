@@ -67,10 +67,7 @@ const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
             </div>
           </div>
           <AddToAssistantButton
-            contractId={contract.noticeId}
-            isAdded={false}
-            onAdd={handleAddToAssistant}
-            onRemove={handleRemoveFromAssistant}
+            contract={contract}  // Pass the full contract object
             disabled={false}
           />
         </div>

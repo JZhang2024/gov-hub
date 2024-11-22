@@ -353,17 +353,8 @@ export interface UserEvent {
 }
 
 export interface AddToAssistantButtonProps {
-  /** The unique identifier of the contract */
-  contractId: string;
-  /** Whether the contract is currently added to the assistant's context */
-  isAdded?: boolean;
-  /** Callback function when adding a contract to context */
-  onAdd: (contractId: string) => void;
-  /** Callback function when removing a contract from context */
-  onRemove: (contractId: string) => void;
-  /** Whether the button should be disabled (e.g., when max contracts reached) */
+  contract: Contract;
   disabled?: boolean;
-  /** Additional CSS classes to apply to the button */
   className?: string;
 }
 

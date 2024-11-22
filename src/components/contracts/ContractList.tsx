@@ -25,20 +25,7 @@ export default function ContractList() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
-  // Track contracts added to assistant
-  const [assistantContracts, setAssistantContracts] = useState<Set<string>>(new Set());
 
-  const handleAddToAssistant = (contractId: string) => {
-    setAssistantContracts(prev => new Set([...prev, contractId]));
-  };
-
-  const handleRemoveFromAssistant = (contractId: string) => {
-    setAssistantContracts(prev => {
-      const next = new Set(prev);
-      next.delete(contractId);
-      return next;
-    });
-  };
 
   useEffect(() => {
     const fetchContracts = async () => {
