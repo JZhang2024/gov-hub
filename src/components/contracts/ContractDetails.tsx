@@ -12,13 +12,24 @@ import {
   Download,
   ExternalLink,
   Mail,
-  Phone
+  Phone,
+  AlertTriangle
 } from 'lucide-react';
-import { Contract, ContractDetailProps} from '@/types/contracts';
+import { Contract, ContractDetailProps } from '@/types/contracts';
 import { formatCurrency, formatDate } from '@/lib/utils/format-data';
+import { useProxyDownload } from '@/hooks/useProxyDownload';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
   const [tab, setTab] = useState("overview");
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const { downloadFile, isDownloading } = useProxyDownload({
+    onError: (error) => {
+      setDownloadError('Failed to download document. Please try again later.');
+      setTimeout(() => setDownloadError(null), 5000); // Clear error after 5 seconds
+    }
+  });
 
   // Helper to safely get nested award properties
   const getAwardInfo = () => {
@@ -49,13 +60,21 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
         {poc.title && <div className="text-gray-600">{poc.title}</div>}
         <div className="flex items-center gap-4">
           {poc.email && (
-            <a href={`mailto:${poc.email}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            <a 
+              href={`mailto:${poc.email}`} 
+              className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Mail className="h-4 w-4" />
               <span>Email</span>
             </a>
           )}
           {poc.phone && (
-            <a href={`tel:${poc.phone}`} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
+            <a 
+              href={`tel:${poc.phone}`} 
+              className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Phone className="h-4 w-4" />
               <span>Call</span>
             </a>
@@ -67,62 +86,129 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
 
   const awardInfo = getAwardInfo();
 
+  const renderDates = () => (
+    <Card className="p-4 bg-gray-50">
+      <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
+        <Clock className="h-4 w-4" />
+        Key Dates
+      </div>
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-gray-600">Posted:</span>
+          <span className="font-medium">{formatDate(contract.postedDate)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Response Due:</span>
+          <span className="font-medium text-red-600">
+            {formatDate(contract.responseDeadLine || '')}
+          </span>
+        </div>
+        {contract.archiveDate && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Archive Date:</span>
+            <span className="font-medium">{formatDate(contract.archiveDate)}</span>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+
+  const renderSetAside = () => (
+    <Card className="p-4 bg-gray-50">
+      <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
+        <Users className="h-4 w-4" />
+        Set-Aside
+      </div>
+      <div className="space-y-2 text-sm">
+        {contract.typeOfSetAsideDescription ? (
+          <>
+            <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+              {contract.typeOfSetAside || 'Not specified'}
+            </Badge>
+            <div className="text-gray-600 mt-2">
+              {contract.typeOfSetAsideDescription}
+            </div>
+          </>
+        ) : (
+          <div className="text-gray-600">No set-aside specified</div>
+        )}
+      </div>
+    </Card>
+  );
+
+  const renderDocuments = () => (
+    <div className="p-4 space-y-4">
+      {downloadError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{downloadError}</AlertDescription>
+        </Alert>
+      )}
+      
+      {contract.resourceLinks && contract.resourceLinks.length > 0 ? (
+        <Card className="divide-y">
+          {contract.resourceLinks.map((link, index) => (
+            <div key={index} className="flex items-center justify-between p-4 hover:bg-gray-50">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-gray-400" />
+                <div>
+                  <div className="font-medium">Resource {index + 1}</div>
+                  <div className="text-sm text-gray-500">
+                    Added {formatDate(contract.postedDate)}
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  downloadFile(link, contract.noticeId);
+                }}
+                disabled={isDownloading}
+                className="text-blue-600 hover:text-blue-700 disabled:opacity-50 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                {isDownloading ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-r-transparent" />
+                ) : (
+                  <Download className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          ))}
+        </Card>
+      ) : (
+        <div className="text-center text-gray-500 py-8">
+          No documents available
+        </div>
+      )}
+
+      <div className="mt-4">
+        <a 
+          href={contract.uiLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+        >
+          View on SAM.gov
+          <ExternalLink className="h-4 w-4" />
+        </a>
+      </div>
+    </div>
+  );
+
   return (
     <div className="border-t">
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="w-full border-b rounded-none">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="documents">Attachments</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
           <div className="p-4 grid grid-cols-2 gap-4">
-            <Card className="p-4 bg-gray-50">
-              <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
-                <Clock className="h-4 w-4" />
-                Key Dates
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Posted:</span>
-                  <span className="font-medium">{formatDate(contract.postedDate)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Response Due:</span>
-                  <span className="font-medium text-red-600">
-                    {formatDate(contract.responseDeadLine || '')}
-                  </span>
-                </div>
-                {contract.archiveDate && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Archive Date:</span>
-                    <span className="font-medium">{formatDate(contract.archiveDate)}</span>
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-gray-50">
-              <div className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-600">
-                <Users className="h-4 w-4" />
-                Set-Aside
-              </div>
-              <div className="space-y-2 text-sm">
-                {contract.typeOfSetAsideDescription ? (
-                  <>
-                    <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                      {contract.typeOfSetAside || 'Not specified'}
-                    </Badge>
-                    <div className="text-gray-600 mt-2">
-                      {contract.typeOfSetAsideDescription}
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-gray-600">No set-aside specified</div>
-                )}
-              </div>
-            </Card>
+            {renderDates()}
+            {renderSetAside()}
 
             {contract.pointOfContact?.[0] && (
               <Card className="p-4 bg-gray-50">
@@ -266,49 +352,7 @@ const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
         </TabsContent>
 
         <TabsContent value="documents">
-          <div className="p-4 space-y-4">
-            {contract.resourceLinks && contract.resourceLinks.length > 0 ? (
-              <Card className="divide-y">
-                {contract.resourceLinks.map((link, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 hover:bg-gray-50">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <div className="font-medium">Resource {index + 1}</div>
-                        <div className="text-sm text-gray-500">
-                          Added {formatDate(contract.postedDate)}
-                        </div>
-                      </div>
-                    </div>
-                    <a 
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer" 
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      <Download className="h-5 w-5" />
-                    </a>
-                  </div>
-                ))}
-              </Card>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                No documents available
-              </div>
-            )}
-
-            <div className="mt-4">
-              <a 
-                href={contract.uiLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                View on SAM.gov
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
+          {renderDocuments()}
         </TabsContent>
       </Tabs>
     </div>
