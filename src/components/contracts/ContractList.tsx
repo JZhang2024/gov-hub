@@ -11,8 +11,7 @@ import { getContracts } from '@/lib/supabase/contracts';
 import type { Contract, SearchFilters } from '@/types/contracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-
+import ContractAssistant from './ContractAssistant';
 const ITEMS_PER_PAGE = 25;
 
 export default function ContractList() {
@@ -26,6 +25,20 @@ export default function ContractList() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
+  // Track contracts added to assistant
+  const [assistantContracts, setAssistantContracts] = useState<Set<string>>(new Set());
+
+  const handleAddToAssistant = (contractId: string) => {
+    setAssistantContracts(prev => new Set([...prev, contractId]));
+  };
+
+  const handleRemoveFromAssistant = (contractId: string) => {
+    setAssistantContracts(prev => {
+      const next = new Set(prev);
+      next.delete(contractId);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const fetchContracts = async () => {
@@ -237,6 +250,7 @@ export default function ContractList() {
         onApplyFilters={handleApplyFilters}
         isLoading={isLoading}
       />
+      <ContractAssistant />
     </div>
   );
 }

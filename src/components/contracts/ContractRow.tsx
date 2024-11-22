@@ -1,4 +1,4 @@
-// ContractRow.tsx
+import AddToAssistantButton from './AddToAssistantButton';
 import { ChevronRight, Building2, DollarSign, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Contract, ContractRowProps } from '@/types/contracts';
@@ -15,6 +15,14 @@ const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
   const awardAmount = contract.award?.amount;
   
   const status = getStatusInfo(contract);
+  const handleAddToAssistant = (contractId: string) => {
+    // Handle adding to assistant context
+    console.log('Adding contract to assistant:', contractId);
+  };
+  const handleRemoveFromAssistant = (contractId: string) => {
+    // Handle removing from assistant context
+    console.log('Removing contract from assistant:', contractId);
+  };
 
   return (
     <div className="border-b last:border-b-0 transition-all">
@@ -58,6 +66,13 @@ const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
               </div>
             </div>
           </div>
+          <AddToAssistantButton
+            contractId={contract.noticeId}
+            isAdded={false}
+            onAdd={handleAddToAssistant}
+            onRemove={handleRemoveFromAssistant}
+            disabled={false}
+          />
         </div>
       </div>
 
