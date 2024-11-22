@@ -4,28 +4,6 @@ CREATE EXTENSION IF NOT EXISTS "vector";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- For fuzzy text search
--- Enums for consistent typing
-CREATE TYPE contract_status AS ENUM(
-  'Active',
-  'Pending',
-  'Archived',
-  'Awarded',
-  'Cancelled'
-);
-
-CREATE TYPE contract_type AS ENUM(
-  'Solicitation',
-  'Award Notice',
-  'Justification',
-  'Intent to Bundle',
-  'Pre-Solicitation',
-  'Combined Synopsis/Solicitation',
-  'Sale of Surplus Property',
-  'Fair Opportunity / Limited Sources Justification',
-  'Foreign Government Standard',
-  'Special Notice',
-  'Sources Sought'
-);
 
 -- Main contracts table
 CREATE TABLE
