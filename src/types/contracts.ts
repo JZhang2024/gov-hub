@@ -1,4 +1,4 @@
-// Main contract interface matching SAM.gov opportunities data structure
+// contracts.ts
 export interface Contract {
   // Core Identification
   noticeId: string;
@@ -15,7 +15,7 @@ export interface Contract {
   
   // Dates and Status
   postedDate: string;
-  type: string;
+  type: ContractType;
   baseType: string;
   archiveType: string;
   archiveDate: string | null;
@@ -55,6 +55,8 @@ export interface Contract {
       ueiSAM: string;
     };
   } | null;
+
+  status?: ContractStatus;
   
   // Contact Information
   pointOfContact: Array<{
@@ -109,22 +111,87 @@ export interface Contract {
   }>;
 }
 
-// SAM.gov Opportunities API response types
-export interface SAMApiResponse {
-  totalRecords: number;
-  limit: number;
-  offset: number;
-  opportunitiesData: Contract[];
-  links: Array<{
-    rel: string;
-    href: string;
-    hreflang: string | null;
-    media: string | null;
-    title: string | null;
-    type: string | null;
-    deprecation: string | null;
-  }>;
-}
+// Database types
+export type DatabaseContract = {
+  id: number;
+  notice_id: string;
+  title: string;
+  solicitation_number: string | null;
+  department: string | null;
+  sub_tier: string | null;
+  office: string | null;
+  posted_date: string;
+  type: ContractType;
+  base_type: string;
+  archive_type: string;
+  archive_date: string | null;
+  set_aside_description: string | null;
+  set_aside_code: string | null;
+  response_deadline: string | null;
+  naics_code: string;
+  classification_code: string;
+  active: boolean;
+  description: string | null;
+  organization_type: string;
+  ui_link: string;
+  award: {
+    date: string;
+    number: string;
+    amount: string;
+    awardee: {
+      name: string;
+      location: {
+        streetAddress: string;
+        city: {
+          code: string;
+          name: string;
+        };
+        state: {
+          code: string;
+        };
+        zip: string;
+        country: {
+          code: string;
+        };
+      };
+      ueiSAM: string;
+    };
+  } | null;
+  resource_links: string[] | null;
+  created_at: string;
+  updated_at: string;
+  last_sync_at: string;
+  contract_addresses: DatabaseAddress[];
+  contract_contacts: DatabaseContact[];
+  search_vector: unknown;
+};
+
+export type DatabaseAddress = {
+  id: number;
+  contract_id: number;
+  address_type: 'office' | 'performance';
+  street_address: string | null;
+  city: string | null;
+  city_code: string | null;
+  state: string | null;
+  state_code: string | null;
+  zip: string | null;
+  country: string | null;
+  country_code: string | null;
+  created_at: string;
+};
+
+export type DatabaseContact = {
+  id: number;
+  contract_id: number;
+  contact_type: string;
+  full_name: string | null;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
+  fax: string | null;
+  created_at: string;
+};
 
 // Component Props Types
 export interface ContractRowProps {
@@ -142,6 +209,7 @@ export interface SearchBarProps {
   onSearch: (query: string) => void;
   onFilter: () => void;
   onExport: () => void;
+  filterCount: number;
 }
 
 export interface PaginationProps {
@@ -157,7 +225,7 @@ export interface PaginationProps {
 export interface SearchFilters {
   setAside?: SetAsideType[];
   type?: ContractType[];
-  status?: ContractStatus[];  // Changed from single status to array
+  status?: ContractStatus[];
   agency?: string[];
   dateRange?: {
     start: string;
@@ -177,32 +245,35 @@ export interface SearchQuery {
   limit: number;
 }
 
-// User Related Types
-export interface SavedSearch {
-  id: string;
-  userId: string;
-  name: string;
-  query: SearchQuery;
-  createdAt: string;
-  lastRun?: string;
+// Response Types
+export interface ContractsResponse {
+  data: Contract[];
+  count: number;
+  error: Error | null;
 }
 
-export interface UserPreferences {
-  userId: string;
-  emailNotifications: boolean;
-  defaultFilters: SearchFilters;
-  savedSearches: SavedSearch[];
-  createdAt: string;
-  updatedAt: string;
+export interface ContractResponse {
+  data: Contract | null;
+  error: Error | null;
 }
+
+export interface AnalyticsResponse {
+  data: ContractAnalytics | null;
+  error: Error | null;
+}
+
+// Query Parameters
+export type ContractQueryParams = {
+  search?: string;
+  sortOrder?: 'asc' | 'desc';
+  filters?: SearchFilters;
+};
 
 // Enum Types
 export type ContractStatus = 
   | 'Active' 
-  | 'Pending' 
   | 'Archived' 
-  | 'Awarded' 
-  | 'Cancelled';
+  | 'Awarded';
 
 export type ContractType = 
   | 'Solicitation'
@@ -234,17 +305,6 @@ export type SortOption =
   | 'valueDesc'
   | 'valueAsc';
 
-// API Response Types
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  metadata?: {
-    page: number;
-    totalPages: number;
-    totalItems: number;
-  };
-}
-
 // Analytics Types
 export interface ContractAnalytics {
   totalContracts: number;
@@ -269,7 +329,7 @@ export interface ContractAnalytics {
   }[];
 }
 
-// Event Types for Real-time Updates
+// Event Types
 export interface ContractEvent {
   type: 'created' | 'updated' | 'deleted';
   contract: Contract;
@@ -282,61 +342,3 @@ export interface UserEvent {
   data: any;
   timestamp: string;
 }
-
-export type DatabaseContract = {
-  id: number;
-  notice_id: string;
-  title: string;
-  solicitation_number: string | null;
-  department: string | null;
-  sub_tier: string | null;
-  office: string | null;
-  posted_date: string;
-  type: string;
-  base_type: string;
-  archive_type: string;
-  archive_date: string | null;
-  set_aside_description: string | null;
-  set_aside_code: string | null;
-  response_deadline: string | null;
-  naics_code: string;
-  classification_code: string;
-  active: boolean;
-  description: string | null;
-  organization_type: string;
-  ui_link: string;
-  award: any; // Keep as any since it's a JSONB field
-  resource_links: string[] | null;
-  created_at: string;
-  updated_at: string;
-  last_sync_at: string;
-  contract_addresses: DatabaseAddress[];
-  contract_contacts: DatabaseContact[];
-};
-
-export type DatabaseAddress = {
-  id: number;
-  contract_id: number;
-  address_type: 'office' | 'performance';
-  street_address: string | null;
-  city: string | null;
-  city_code: string | null;
-  state: string | null;
-  state_code: string | null;
-  zip: string | null;
-  country: string | null;
-  country_code: string | null;
-  created_at: string;
-};
-
-export type DatabaseContact = {
-  id: number;
-  contract_id: number;
-  contact_type: string;
-  full_name: string | null;
-  title: string | null;
-  email: string | null;
-  phone: string | null;
-  fax: string | null;
-  created_at: string;
-};

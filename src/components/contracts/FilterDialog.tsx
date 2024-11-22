@@ -59,10 +59,8 @@ const setAsideTypes: SetAsideType[] = [
 
 const statusOptions: ContractStatus[] = [
   'Active',
-  'Pending',
   'Archived',
-  'Awarded',
-  'Cancelled'
+  'Awarded'
 ];
 
 const FilterDialog = ({ 
