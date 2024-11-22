@@ -1,4 +1,3 @@
-// contracts.ts
 export interface Contract {
   // Core Identification
   noticeId: string;
@@ -351,4 +350,60 @@ export interface UserEvent {
   userId: string;
   data: any;
   timestamp: string;
+}
+
+export interface AddToAssistantButtonProps {
+  /** The unique identifier of the contract */
+  contractId: string;
+  /** Whether the contract is currently added to the assistant's context */
+  isAdded?: boolean;
+  /** Callback function when adding a contract to context */
+  onAdd: (contractId: string) => void;
+  /** Callback function when removing a contract from context */
+  onRemove: (contractId: string) => void;
+  /** Whether the button should be disabled (e.g., when max contracts reached) */
+  disabled?: boolean;
+  /** Additional CSS classes to apply to the button */
+  className?: string;
+}
+
+export interface Message {
+  role: 'assistant' | 'user';
+  content: string;
+}
+
+export interface ContractContext {
+  title: string;
+  id: string;
+  solicitationNumber?: string;
+  department?: string;
+  type: string;
+  postedDate: string;
+  responseDeadline: string | null;
+  setAside: {
+    type: string | null;
+    description: string | null;
+  };
+  naicsCode: string;
+  status: string;
+  amount?: string;
+  placeOfPerformance: string;
+}
+
+export interface ContractDetailProps {
+  contract: Contract;
+  onClose: () => void;
+}
+
+export interface FilterDialogProps {
+  open: boolean;
+  onClose: () => void;
+  initialFilters: SearchFilters;
+  onApplyFilters: (filters: SearchFilters) => void;
+  isLoading?: boolean;
+}
+
+export interface SetAsideOption {
+  code: SetAsideType;
+  label: string;
 }

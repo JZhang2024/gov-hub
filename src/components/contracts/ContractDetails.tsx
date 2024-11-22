@@ -14,13 +14,8 @@ import {
   Mail,
   Phone
 } from 'lucide-react';
-import { Contract } from '@/types/contracts';
+import { Contract, ContractDetailProps} from '@/types/contracts';
 import { formatCurrency, formatDate } from '@/lib/utils/format-data';
-
-interface ContractDetailProps {
-  contract: Contract;
-  onClose: () => void;
-}
 
 const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
   const [tab, setTab] = useState("overview");

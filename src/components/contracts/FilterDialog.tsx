@@ -22,21 +22,10 @@ import {
   SearchFilters, 
   ContractType, 
   SetAsideType, 
-  ContractStatus 
+  ContractStatus,
+  FilterDialogProps,
+  SetAsideOption
 } from '@/types/contracts';
-
-interface FilterDialogProps {
-  open: boolean;
-  onClose: () => void;
-  initialFilters: SearchFilters;
-  onApplyFilters: (filters: SearchFilters) => void;
-  isLoading?: boolean;
-}
-
-interface SetAsideOption {
-  code: SetAsideType;
-  label: string;
-}
 
 const contractTypes: ContractType[] = [
   'Solicitation',

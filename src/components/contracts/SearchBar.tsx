@@ -1,13 +1,7 @@
 import { Search, Filter, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-interface SearchBarProps {
-  onSearch: (query: string) => void;
-  onFilter: () => void;
-  onExport: () => void;
-  filterCount: number;
-}
+import { SearchBarProps } from '@/types/contracts';
 
 const SearchBar = ({ onSearch, onFilter, onExport, filterCount }: SearchBarProps) => {
   return (

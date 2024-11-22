@@ -1,21 +1,7 @@
 import React from 'react';
 import { Plus, Bot, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface AddToAssistantButtonProps {
-  /** The unique identifier of the contract */
-  contractId: string;
-  /** Whether the contract is currently added to the assistant's context */
-  isAdded?: boolean;
-  /** Callback function when adding a contract to context */
-  onAdd: (contractId: string) => void;
-  /** Callback function when removing a contract from context */
-  onRemove: (contractId: string) => void;
-  /** Whether the button should be disabled (e.g., when max contracts reached) */
-  disabled?: boolean;
-  /** Additional CSS classes to apply to the button */
-  className?: string;
-}
+import { AddToAssistantButtonProps } from '@/types/contracts';
 
 const AddToAssistantButton: React.FC<AddToAssistantButtonProps> = ({ 
   contractId,

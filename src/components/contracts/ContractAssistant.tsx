@@ -1,54 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Bot, User, Loader2, FileText, X, Book } from 'lucide-react';
-
-interface Contract {
-  noticeId: string;
-  title: string;
-  solicitationNumber?: string;
-  fullParentPathName?: string;
-  type: string;
-  postedDate: string;
-  responseDeadLine: string | null;
-  typeOfSetAside: string | null;
-  typeOfSetAsideDescription: string | null;
-  naicsCode: string;
-  active: string;
-  award?: {
-    amount: string;
-  } | null;
-  placeOfPerformance: {
-    city: {
-      name: string;
-    };
-    state: {
-      code: string;
-    };
-  };
-}
-
-interface Message {
-  role: 'assistant' | 'user';
-  content: string;
-}
-
-interface ContractContext {
-  title: string;
-  id: string;
-  solicitationNumber?: string;
-  department?: string;
-  type: string;
-  postedDate: string;
-  responseDeadline: string | null;
-  setAside: {
-    type: string | null;
-    description: string | null;
-  };
-  naicsCode: string;
-  status: string;
-  amount?: string;
-  placeOfPerformance: string;
-}
+import { Contract, Message, ContractContext } from '@/types/contracts';
 
 const MAX_CONTEXT_CONTRACTS = 5;
 

@@ -1,11 +1,6 @@
 import { X } from 'lucide-react';
-import { Contract } from '@/types/contracts';
+import { ContractCardProps } from '@/types/contracts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface ContractCardProps {
-  contract: Contract;
-  onClose: () => void;
-}
 
 const ContractCard = ({ contract, onClose }: ContractCardProps) => {
   const formatCurrency = (amount: string) => {
