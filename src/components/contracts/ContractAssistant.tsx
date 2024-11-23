@@ -119,10 +119,16 @@ export default function ContractAssistant() {
 
       {/* Sliding Panel */}
       <div 
-        className={`fixed right-0 top-0 bottom-0 w-96 bg-white shadow-lg transform transition-transform duration-200 ease-in-out z-50 ${
+        className={`fixed right-0 top-0 bottom-0 w-96 bg-white shadow-lg transform transition-transform duration-200 ease-in-out z-40 ${
           isPanelOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
+        <style jsx global>{`
+          body {
+            transition: padding-right 0.2s ease-in-out;
+            padding-right: ${isPanelOpen ? '384px' : '0'} !important;
+          }
+        `}</style>
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-blue-50 to-white">
