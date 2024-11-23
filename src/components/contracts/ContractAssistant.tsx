@@ -207,14 +207,6 @@ export default function ContractAssistant() {
                   <div className={message.role === 'assistant' ? 'prose prose-sm max-w-none' : ''}>
                     <ReactMarkdown
                       className="whitespace-pre-wrap font-sans"
-                      components={{
-                        // Override default component styling
-                        p: ({ children }) => <p className="m-0">{children}</p>,
-                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                        ul: ({ children }) => <ul className="my-2">{children}</ul>,
-                        ol: ({ children }) => <ol className="my-2">{children}</ol>,
-                        li: ({ children }) => <li className="my-0">{children}</li>,
-                      }}
                     >
                       {message.content}
                     </ReactMarkdown>
@@ -249,9 +241,17 @@ export default function ContractAssistant() {
                   key={question}
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setInput(question);
-                    document.getElementById('qa-input')?.focus();
+                  onClick={async () => {
+                    if (contextContracts.length > 0) {
+                      // First update the input
+                      setInput(question);
+                      // Create a synthetic event
+                      const syntheticEvent = {
+                        preventDefault: () => {},
+                      } as React.FormEvent;
+                      // Call handleSubmit
+                      handleSubmit(syntheticEvent);
+                    }
                   }}
                   className="text-sm"
                 >
