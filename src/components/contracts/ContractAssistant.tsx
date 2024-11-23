@@ -10,6 +10,7 @@ import {
   QUICK_QUESTIONS,
   AIMessage
 } from '@/lib/contract-assistant/types';
+import ReactMarkdown from 'react-markdown';
 
 // Helper to create contract context objects
 const createContractContext = (contract: Contract): ContractContext => ({
@@ -199,11 +200,25 @@ export default function ContractAssistant() {
                 <div
                   className={`max-w-[80%] rounded-xl p-3 ${
                     message.role === 'assistant'
-                      ? 'bg-white border shadow-sm'
+                      ? 'bg-white border shadow-sm prose prose-sm'
                       : 'bg-blue-600 text-white'
                   }`}
                 >
-                  <pre className="whitespace-pre-wrap font-sans">{message.content}</pre>
+                  <div className={message.role === 'assistant' ? 'prose prose-sm max-w-none' : ''}>
+                    <ReactMarkdown
+                      className="whitespace-pre-wrap font-sans"
+                      components={{
+                        // Override default component styling
+                        p: ({ children }) => <p className="m-0">{children}</p>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        ul: ({ children }) => <ul className="my-2">{children}</ul>,
+                        ol: ({ children }) => <ol className="my-2">{children}</ol>,
+                        li: ({ children }) => <li className="my-0">{children}</li>,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
                 {message.role === 'user' && (
                   <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">

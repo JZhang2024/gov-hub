@@ -70,3 +70,15 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.prose {
+  @apply text-foreground;
+}
+
+.prose strong {
+  @apply font-semibold text-foreground;
+}
+
+.prose p {
+  @apply my-0;
+}
