@@ -621,3 +621,8 @@ export interface ExportContractsOptions {
   page?: number;
   pageSize?: number;
 }
+
+export interface UseProxyDownloadProps {
+  onError?: (error: Error) => void;
+  onSuccess?: () => void;
+}

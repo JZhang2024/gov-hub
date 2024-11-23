@@ -20,7 +20,7 @@ import {
   ExportFields,
   ExportContractsOptions
 } from '@/types/contracts';
-import { useContractExport, validateExportOptions, estimateExportSize } from '@/lib/api/export-contracts';
+import { useContractExport, validateExportOptions, estimateExportSize } from '@/hooks/exportContracts';
 
 const ExportDialog = ({ 
   open, 

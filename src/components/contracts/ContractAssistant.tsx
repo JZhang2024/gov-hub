@@ -1,18 +1,38 @@
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Bot, User, Loader2, FileText, X, Book } from 'lucide-react';
-import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAssistantStore, MAX_CONTRACTS } from '@/lib/stores/assistant-store';
 import { formatDate } from '@/lib/utils/format-data';
+import { Contract } from '@/types/contracts';
+import { 
+  ContractContext,
+  AIRequestBody,
+  QUICK_QUESTIONS,
+  AIMessage
+} from '@/lib/contract-assistant/types';
 
-const quickQuestions = [
-  "Compare these contracts",
-  "When are these due?",
-  "Which ones are set-aside?",
-  "Compare requirements"
-];
+// Helper to create contract context objects
+const createContractContext = (contract: Contract): ContractContext => ({
+  title: contract.title,
+  id: contract.noticeId,
+  solicitationNumber: contract.solicitationNumber,
+  department: contract.fullParentPathName,
+  type: contract.type,
+  postedDate: contract.postedDate,
+  responseDeadline: contract.responseDeadLine,
+  setAside: {
+    type: contract.typeOfSetAside,
+    description: contract.typeOfSetAsideDescription
+  },
+  naicsCode: contract.naicsCode,
+  status: contract.active === 'Yes' ? 'Active' : 'Inactive',
+  amount: contract.award?.amount,
+  placeOfPerformance: `${contract.placeOfPerformance.city.name}, ${contract.placeOfPerformance.state.code}`,
+  description: contract.description
+});
 
 export default function ContractAssistant() {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const {
     contextContracts,
     messages,
@@ -27,42 +47,55 @@ export default function ContractAssistant() {
   
   const [input, setInput] = useState('');
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || contextContracts.length === 0) return;
 
-    // Add user message
-    addMessage({ role: 'user', content: input });
+    const userMessage: AIMessage = { role: 'user', content: input };
     setInput('');
     setIsLoading(true);
 
     try {
       // Create context objects for each contract
-      const contractContexts = contextContracts.map(contract => ({
-        title: contract.title,
-        id: contract.noticeId,
-        solicitationNumber: contract.solicitationNumber,
-        department: contract.fullParentPathName,
-        type: contract.type,
-        postedDate: contract.postedDate,
-        responseDeadline: contract.responseDeadLine,
-        setAside: {
-          type: contract.typeOfSetAside,
-          description: contract.typeOfSetAsideDescription
-        },
-        naicsCode: contract.naicsCode,
-        status: contract.active === 'Yes' ? 'Active' : 'Inactive',
-        amount: contract.award?.amount,
-        placeOfPerformance: `${contract.placeOfPerformance.city.name}, ${contract.placeOfPerformance.state.code}`
-      }));
+      const contractContexts = contextContracts.map(createContractContext);
 
-      // In production, this would be an API call to your AI endpoint
-      // For now, we'll simulate a response
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Add user message first
+      addMessage(userMessage);
+
+      // Prepare request body using shared type and include the new message
+      const requestBody: AIRequestBody = {
+        messages: [...messages, userMessage],
+        context: contractContexts
+      };
+
+      // Make API call to AI endpoint
+      const response = await fetch('/api/contract-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
+
+      const data = await response.json();
       
-      const response = simulateResponse(input, contractContexts);
-      addMessage({ role: 'assistant', content: response });
+      // Add assistant message after getting response
+      addMessage({ role: 'assistant', content: data.message });
+
     } catch (error) {
+      console.error('Error in handleSubmit:', error);
       addMessage({
         role: 'assistant',
         content: "I apologize, but I encountered an error processing your question. Please try again."
@@ -72,45 +105,6 @@ export default function ContractAssistant() {
     }
   };
 
-  const simulateResponse = (question: string, contexts: any[]): string => {
-    const q = question.toLowerCase();
-    
-    if (contexts.length === 0) {
-      return "Please add some contracts to the context first so I can help analyze them.";
-    }
-
-    if (q.includes('compare') || q.includes('difference')) {
-      return `Comparing ${contexts.length} contracts:\n\n` +
-             contexts.map(c => 
-               `${c.title}:\n` +
-               `• Posted: ${formatDate(c.postedDate)}\n` +
-               `• Type: ${c.type}\n` +
-               `• Set-aside: ${c.setAside.description || 'None'}\n`
-             ).join('\n');
-    }
-    
-    if (q.includes('deadline') || q.includes('due')) {
-      return contexts.map(c => 
-        `${c.title}: Due ${formatDate(c.responseDeadline)}`
-      ).join('\n');
-    }
-
-    if (q.includes('set-aside') || q.includes('setaside')) {
-      return contexts.map(c => 
-        `${c.title}: ${c.setAside.description || 'No set-aside'}`
-      ).join('\n');
-    }
-
-    if (q.includes('requirement')) {
-      return "I can analyze the requirements for these contracts. Would you like me to compare specific aspects like technical requirements, qualifications, or delivery terms?";
-    }
-
-    return `I can help analyze these contracts. Would you like me to:\n\n` +
-           `• Compare their basic details\n` +
-           `• Check deadlines and important dates\n` +
-           `• Analyze set-aside requirements\n` +
-           `• Look at specific requirements`;
-  };
 
   return (
     <>
@@ -222,13 +216,14 @@ export default function ContractAssistant() {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Quick Questions */}
           <div className="p-4 border-t bg-gray-50">
             <div className="text-sm text-gray-500 mb-2">Quick Questions:</div>
             <div className="flex flex-wrap gap-2">
-              {quickQuestions.map((question) => (
+              {QUICK_QUESTIONS.map((question) => (
                 <Button
                   key={question}
                   variant="outline"

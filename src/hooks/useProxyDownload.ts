@@ -1,9 +1,6 @@
 import { useState } from 'react';
+import { UseProxyDownloadProps } from '@/types/contracts';
 
-interface UseProxyDownloadProps {
-  onError?: (error: Error) => void;
-  onSuccess?: () => void;
-}
 
 export const useProxyDownload = ({ onError, onSuccess }: UseProxyDownloadProps = {}) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -12,7 +9,7 @@ export const useProxyDownload = ({ onError, onSuccess }: UseProxyDownloadProps =
     setIsDownloading(true);
 
     try {
-      // Create the proxy URL. Set to localhost for development
+      // Create the proxy URL. This is a Next.js API route that will fetch the file
       const proxyUrl = `/api/proxy-download?${new URLSearchParams({
         url: fileUrl,
         noticeId,
