@@ -12,6 +12,7 @@ import type { Contract, SearchFilters } from '@/types/contracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ContractAssistant from './ContractAssistant';
+import ExportDialog from './ExportDialog';
 const ITEMS_PER_PAGE = 25;
 
 export default function ContractList() {
@@ -25,6 +26,7 @@ export default function ContractList() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
+  const [showExport, setShowExport] = useState(false);
 
 
   useEffect(() => {
@@ -92,8 +94,7 @@ export default function ContractList() {
   };
 
   const handleExport = () => {
-    // TODO: Implement export
-    console.log('Export clicked');
+    setShowExport(true);
   };
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
@@ -236,6 +237,15 @@ export default function ContractList() {
         initialFilters={filters}
         onApplyFilters={handleApplyFilters}
         isLoading={isLoading}
+      />
+      <ExportDialog
+        open={showExport}
+        onClose={() => setShowExport(false)}
+        contracts={contracts}
+        totalCount={totalItems}
+        currentFilters={filters}
+        currentPage={currentPage}
+        pageSize={ITEMS_PER_PAGE}
       />
       <ContractAssistant />
     </div>

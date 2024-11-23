@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter
@@ -160,12 +161,10 @@ const FilterDialog = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>Filter Contracts</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle>Filter Contracts</DialogTitle>
+          <DialogDescription>
+            Select criteria to filter the contract list. Changes will apply to your current search results.
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

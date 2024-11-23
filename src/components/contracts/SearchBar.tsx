@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SearchBarProps } from '@/types/contracts';
 
-const SearchBar = ({ onSearch, onFilter, onExport, filterCount }: SearchBarProps) => {
+const SearchBar = ({ onSearch, onFilter, onExport, filterCount, isExporting = false }: SearchBarProps) => {
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 mb-8 flex flex-wrap gap-4 items-center">
       <div className="flex-1 min-w-[300px] relative">
@@ -33,9 +33,10 @@ const SearchBar = ({ onSearch, onFilter, onExport, filterCount }: SearchBarProps
       <Button
         onClick={onExport}
         className="gap-2"
+        disabled={isExporting}  // Add disabled state
       >
-        <Download className="h-4 w-4" />
-        Export
+        <Download className={`h-4 w-4 ${isExporting ? 'animate-bounce' : ''}`} />
+        {isExporting ? 'Exporting...' : 'Export'}
       </Button>
     </div>
   );

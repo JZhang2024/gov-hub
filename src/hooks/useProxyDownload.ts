@@ -13,7 +13,7 @@ export const useProxyDownload = ({ onError, onSuccess }: UseProxyDownloadProps =
 
     try {
       // Create the proxy URL. Set to localhost for development
-      const proxyUrl = `http://localhost:3000/api/proxy-download?${new URLSearchParams({
+      const proxyUrl = `/api/proxy-download?${new URLSearchParams({
         url: fileUrl,
         noticeId,
       })}`;

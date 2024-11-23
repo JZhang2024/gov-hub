@@ -209,6 +209,7 @@ export interface SearchBarProps {
   onFilter: () => void;
   onExport: () => void;
   filterCount: number;
+  isExporting?: boolean;
 }
 
 export interface PaginationProps {
@@ -397,4 +398,226 @@ export interface FilterDialogProps {
 export interface SetAsideOption {
   code: SetAsideType;
   label: string;
+}
+
+export type ExportFormat = 'csv' | 'excel' | 'json';
+
+export interface ExportFields {
+  basic: boolean;
+  contacts: boolean;
+  addresses: boolean;
+  awards: boolean;
+  setAside: boolean;
+  dates: boolean;
+  links: boolean;
+}
+
+export interface ExportOptions {
+  format: ExportFormat;
+  scope: 'current' | 'all';
+  fields: ExportFields;
+}
+
+export interface ExportRequest {
+  searchQuery?: string;
+  filters?: SearchFilters;
+  selectedFields: ExportFields;
+  format: ExportFormat;
+  scope: 'current' | 'all';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ExportResponse {
+  success: boolean;
+  error?: string;
+  data?: {
+    url: string;
+    filename: string;
+    format: ExportFormat;
+    timestamp: string;
+  };
+}
+
+export interface ExportDialogProps {
+  open: boolean;
+  onClose: () => void;
+  contracts: Contract[];
+  totalCount: number;
+  currentFilters?: SearchFilters;
+  currentPage?: number;
+  pageSize?: number;
+}
+
+// Add these constants for export format options
+export const EXPORT_FORMAT_OPTIONS: Array<{
+  value: ExportFormat;
+  label: string;
+  description: string;
+  icon: string; // You could import specific icons for each format
+}> = [
+  {
+    value: 'csv',
+    label: 'CSV',
+    description: 'Comma-separated values, ideal for spreadsheet software',
+    icon: 'FileText'
+  },
+  {
+    value: 'excel',
+    label: 'Excel',
+    description: 'Microsoft Excel format with formatting preserved',
+    icon: 'Table'
+  },
+  {
+    value: 'json',
+    label: 'JSON',
+    description: 'Structured data format, ideal for developers',
+    icon: 'Braces'
+  }
+];
+
+// Add export field definitions
+export const EXPORT_FIELD_OPTIONS: Array<{
+  id: keyof ExportFields;
+  label: string;
+  description: string;
+}> = [
+  {
+    id: 'basic',
+    label: 'Basic Information',
+    description: 'Contract ID, title, type, and status'
+  },
+  {
+    id: 'contacts',
+    label: 'Contact Information',
+    description: 'Names, emails, and phone numbers of contact persons'
+  },
+  {
+    id: 'addresses',
+    label: 'Address Information',
+    description: 'Office and performance locations'
+  },
+  {
+    id: 'awards',
+    label: 'Award Details',
+    description: 'Award amounts, dates, and recipient information'
+  },
+  {
+    id: 'setAside',
+    label: 'Set-Aside Information',
+    description: 'Set-aside types and descriptions'
+  },
+  {
+    id: 'dates',
+    label: 'Important Dates',
+    description: 'Posted, deadline, and archive dates'
+  },
+  {
+    id: 'links',
+    label: 'Links & Resources',
+    description: 'SAM.gov URLs and related document links'
+  }
+];
+
+// Default export field selection
+export const DEFAULT_EXPORT_FIELDS: ExportFields = {
+  basic: true,
+  contacts: true,
+  addresses: true,
+  awards: true,
+  setAside: true,
+  dates: true,
+  links: false
+};
+
+// Example of exported data structure for each format
+export interface ExportedBasicFields {
+  noticeId: string;
+  title: string;
+  solicitationNumber?: string;
+  type: string;
+  status: string;
+}
+
+export interface ExportedDateFields {
+  postedDate: string;
+  responseDeadline?: string;
+  archiveDate?: string;
+}
+
+export interface ExportedSetAsideFields {
+  setAsideType?: string;
+  setAsideDescription?: string;
+}
+
+export interface ExportedAwardFields {
+  awardDate?: string;
+  awardAmount?: string;
+  awardeeName?: string;
+  awardeeUEI?: string;
+  awardeeLocation?: string;
+}
+
+export interface ExportedContactFields {
+  primaryContactName?: string;
+  primaryContactEmail?: string;
+  primaryContactPhone?: string;
+  secondaryContacts?: Array<{
+    name: string;
+    email: string;
+    phone?: string;
+  }>;
+}
+
+export interface ExportedAddressFields {
+  officeLocation?: {
+    city: string;
+    state: string;
+    zip: string;
+  };
+  performanceLocation?: {
+    city: string;
+    state: string;
+    zip: string;
+  };
+}
+
+export interface ExportedLinkFields {
+  samGovUrl: string;
+  resourceLinks?: string[];
+}
+
+// Complete exported contract structure
+export interface ExportedContract {
+  basic?: ExportedBasicFields;
+  dates?: ExportedDateFields;
+  setAside?: ExportedSetAsideFields;
+  award?: ExportedAwardFields;
+  contacts?: ExportedContactFields;
+  addresses?: ExportedAddressFields;
+  links?: ExportedLinkFields;
+}
+
+// Error types for export functionality
+export type ExportErrorType = 
+  | 'FORMAT_ERROR' 
+  | 'NETWORK_ERROR' 
+  | 'PERMISSION_ERROR' 
+  | 'TIMEOUT_ERROR' 
+  | 'SIZE_LIMIT_ERROR';
+
+export interface ExportErrorDetails {
+  code: ExportErrorType;
+  message: string;
+  details?: any;
+}
+
+export interface ExportContractsOptions {
+  searchQuery?: string;
+  filters?: SearchFilters;
+  selectedFields: ExportFields;
+  format: ExportFormat;
+  scope: 'current' | 'all';
+  page?: number;
+  pageSize?: number;
 }
