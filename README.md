@@ -164,6 +164,12 @@ The following features and improvements are planned for future development:
   - Automated opportunity matching based on user profile
   - Advanced analytics and trend identification
 
+- **Data Synchronization**:
+  - Daily automated sync between SAM.gov and Supabase database
+  - GitHub Actions workflow triggers Supabase Edge Function
+  - Ensures contract data is always up-to-date
+  - Efficient delta updates to minimize processing time
+
 ## Learning Resources
 
 This project draws inspiration and knowledge from:
