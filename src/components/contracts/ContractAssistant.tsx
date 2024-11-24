@@ -56,11 +56,10 @@ export default function ContractAssistant() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || contextContracts.length === 0) return;
-
-    const userMessage: AIMessage = { role: 'user', content: input };
+  const handleSend = async (content: string) => {
+    if (!content.trim() || contextContracts.length === 0) return;
+    
+    const userMessage: AIMessage = { role: 'user', content: content.trim() };
     setInput('');
     setIsLoading(true);
 
@@ -96,7 +95,7 @@ export default function ContractAssistant() {
       addMessage({ role: 'assistant', content: data.message });
 
     } catch (error) {
-      console.error('Error in handleSubmit:', error);
+      console.error('Error in handleSend:', error);
       addMessage({
         role: 'assistant',
         content: "I apologize, but I encountered an error processing your question. Please try again."
@@ -106,6 +105,12 @@ export default function ContractAssistant() {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(input);
+    }
+  };
 
   return (
     <>
@@ -241,18 +246,12 @@ export default function ContractAssistant() {
                   key={question}
                   variant="outline"
                   size="sm"
-                  onClick={async () => {
+                  onClick={() => {
                     if (contextContracts.length > 0) {
-                      // First update the input
-                      setInput(question);
-                      // Create a synthetic event
-                      const syntheticEvent = {
-                        preventDefault: () => {},
-                      } as React.FormEvent;
-                      // Call handleSubmit
-                      handleSubmit(syntheticEvent);
+                      handleSend(question);
                     }
                   }}
+                  disabled={contextContracts.length === 0}
                   className="text-sm"
                 >
                   {question}
@@ -263,7 +262,10 @@ export default function ContractAssistant() {
 
           {/* Input Area */}
           <div className="p-4 border-t">
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleSend(input);
+            }} className="flex gap-2">
               <div className="flex-1 relative">
                 <FileText className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                 <input
@@ -271,6 +273,7 @@ export default function ContractAssistant() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
                   placeholder={contextContracts.length === 0 ? "Add contracts to begin..." : "Ask about these contracts..."}
                   disabled={contextContracts.length === 0}
                   className="w-full pl-11 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
