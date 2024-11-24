@@ -5,53 +5,59 @@ import {
   createSystemMessage 
 } from '@/types/assistant-types';
 
-const openai = new OpenAI({
-    apiKey: process.env.XAI_API_KEY,
-    baseURL: "https://api.x.ai/v1",
-  });
+// Export config for Edge runtime
+export const runtime = 'edge';
 
-export async function POST(req: Request) {
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.XAI_API_KEY,
+  baseURL: "https://api.x.ai/v1",
+});
+
+// Export POST handler
+export async function POST(request: Request) {
   try {
-    const body: AIRequestBody = await req.json();
+    // Parse request body
+    const body: AIRequestBody = await request.json();
     const { messages, context } = body;
 
-    // Validate the request
+    // Validate request data
     if (!Array.isArray(messages) || !Array.isArray(context)) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Invalid request format' }),
+      return NextResponse.json(
+        { error: 'Invalid request format' },
         { status: 400 }
       );
     }
 
-    // Create the system message with context
+    // Create system message with context
     const systemMessage = createSystemMessage(context);
 
-    // Prepare the messages array for the API
+    // Prepare messages for API call
     const apiMessages = [
       systemMessage,
       ...messages.filter(m => m.role === 'user' || m.role === 'assistant')
     ];
 
-    // Make API call to OpenAI with the messages array
+    // Call OpenAI API
     const completion = await openai.chat.completions.create({
-        model: "grok-beta",
-        messages: apiMessages,
-      });
+      model: "grok-beta",
+      messages: apiMessages,
+    });
 
-    
-    return new NextResponse(
-        JSON.stringify({ message: completion.choices[0].message.content }),
-        { status: 200 }
-        );
+    // Return response
+    return NextResponse.json({
+      message: completion.choices[0].message.content
+    });
 
   } catch (error) {
     console.error('Contract Assistant API Error:', error);
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Failed to process request',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }),
-      { status: 500 }
-    );
+    
+    // Return error response
+    return NextResponse.json({ 
+      error: 'Failed to process request',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { 
+      status: 500 
+    });
   }
 }
