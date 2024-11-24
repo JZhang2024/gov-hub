@@ -1,0 +1,24 @@
+name: Daily Contract Sync
+
+on:
+  schedule:
+    # Runs at 02:00 UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  sync-contracts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger Supabase Function
+        run: |
+          curl -X POST "${{ secrets.SUPABASE_FUNCTION_URL }}/sync-contracts" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          --data '{"name":"Functions"}' \
+          -H "Content-Type: application/json"
+        
+      - name: Check for errors
+        if: failure()
+        run: |
+          echo "Contract sync failed. Check function logs in Supabase dashboard."
