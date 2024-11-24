@@ -182,7 +182,7 @@ export default function ContractAssistant() {
               ))}
               {contextContracts.length === 0 && (
                 <div className="text-sm text-gray-500 bg-white p-3 rounded-lg">
-                  No contracts added. Click "Add to Assistant" on any contract to analyze it.
+                  No contracts added. Click &quot;Add to Assistant&quot; on any contract to analyze it.
                 </div>
               )}
             </div>

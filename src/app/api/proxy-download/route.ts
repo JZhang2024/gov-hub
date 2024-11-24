@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 
 // Initialize Supabase client
 const supabase = createClient(

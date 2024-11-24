@@ -57,7 +57,7 @@ const customStorage = {
 
 export const useAssistantStore = create<AssistantState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Initial state
       contextContracts: [],
       messages: [{

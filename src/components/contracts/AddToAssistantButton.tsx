@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Bot, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AddToAssistantButtonProps, Contract } from '@/types/contracts';
+import { AddToAssistantButtonProps } from '@/types/contracts';
 import { useAssistantStore, useIsContractInContext } from '@/lib/stores/assistant-store';
 
 const AddToAssistantButton: React.FC<AddToAssistantButtonProps> = ({ 

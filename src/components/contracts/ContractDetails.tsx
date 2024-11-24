@@ -20,12 +20,12 @@ import { formatCurrency, formatDate } from '@/lib/utils/format-data';
 import { useProxyDownload } from '@/hooks/useProxyDownload';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-const ContractDetails = ({ contract, onClose }: ContractDetailProps) => {
+const ContractDetails = ({ contract }: ContractDetailProps) => {
   const [tab, setTab] = useState("overview");
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const { downloadFile, isDownloading } = useProxyDownload({
-    onError: (error) => {
+    onError: () => {
       setDownloadError('Failed to download document. Please try again later.');
       setTimeout(() => setDownloadError(null), 5000); // Clear error after 5 seconds
     }

@@ -1,8 +1,8 @@
 import AddToAssistantButton from './AddToAssistantButton';
 import { ChevronRight, Building2, DollarSign, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Contract, ContractRowProps } from '@/types/contracts';
-import { formatCurrency, formatDate, getStatusInfo } from '@/lib/utils/format-data';
+import { ContractRowProps } from '@/types/contracts';
+import { formatCurrency, getStatusInfo } from '@/lib/utils/format-data';
 import ContractDetails from './ContractDetails';
 
 const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
@@ -15,14 +15,6 @@ const ContractRow = ({ contract, isExpanded, onToggle }: ContractRowProps) => {
   const awardAmount = contract.award?.amount;
   
   const status = getStatusInfo(contract);
-  const handleAddToAssistant = (contractId: string) => {
-    // Handle adding to assistant context
-    console.log('Adding contract to assistant:', contractId);
-  };
-  const handleRemoveFromAssistant = (contractId: string) => {
-    // Handle removing from assistant context
-    console.log('Removing contract from assistant:', contractId);
-  };
 
   return (
     <div className="border-b last:border-b-0 transition-all">

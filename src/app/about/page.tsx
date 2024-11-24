@@ -21,7 +21,7 @@ export default function About() {
           <li><strong>Frontend:</strong> Next.js 15 with App Router, React, TypeScript, and Tailwind CSS</li>
           <li><strong>UI Components:</strong> Shadcn/ui for modern, accessible components</li>
           <li><strong>Database:</strong> Supabase for PostgreSQL database</li>
-          <li><strong>AI Integration:</strong> OpenAPI using xAI's grok-beta for contract analysis and question answering</li>
+          <li><strong>AI Integration:</strong> OpenAPI using xAI&lsquo;s grok-beta for contract analysis and question answering</li>
           <li><strong>Data Processing:</strong> Supabase DB and Edge Functions with SQL/TypeScript for ETL and data transformation</li>
           <li><strong>Deployment:</strong> Vercel for frontend hosting and serverless functions</li>
         </ul>

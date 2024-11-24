@@ -11,8 +11,6 @@ import type {
   ContractResponse,
   AnalyticsResponse,
   DatabaseContract,
-  DatabaseAddress,
-  DatabaseContact
 } from '@/types/contracts';
 
 // Create Supabase client
@@ -123,7 +121,6 @@ const transformDatabaseContract = (contract: DatabaseContract): Contract => {
 // Helper function to build filter query
 const applyFilters = (query: any, filters: SearchFilters) => {
   const { type, setAside, status, dateRange, valueRange } = filters;
-  const now = new Date().toISOString();
 
   // Contract type filter
   if (type?.length) {
