@@ -24,13 +24,8 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/contracts">
                 <Button size="lg" className="gap-2">
-                  Browse Contracts
+                  Start Exploring
                   <ArrowRight className="h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/about">
-                <Button variant="outline" size="lg">
-                  Learn More
                 </Button>
               </Link>
             </div>
@@ -77,13 +72,13 @@ export default function Home() {
       {/* CTA Section */}
       <section className="bg-blue-50 py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+          <h2 className="text-3xl font-bold mb-6">Want to Learn More?</h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Start exploring government contracts and leverage the power of AI to find the information you need.
+            Check out our About page to learn about the tech stack and APIs used in this project.
           </p>
-          <Link href="/contracts">
+          <Link href="/about">
             <Button size="lg" className="gap-2">
-              Start Searching
+              View Project Details
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
