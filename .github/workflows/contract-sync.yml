@@ -13,10 +13,9 @@ jobs:
     steps:
       - name: Trigger Supabase Function
         run: |
-          curl -X POST "${{ secrets.SUPABASE_FUNCTION_URL }}/sync-contracts" \
+          curl -L -X POST "${{ secrets.SUPABASE_FUNCTION_URL }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-          --data '{"name":"Functions"}' \
-          -H "Content-Type: application/json"
+          --data '{"name":"Functions"}'
         
       - name: Check for errors
         if: failure()
