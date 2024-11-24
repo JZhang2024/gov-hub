@@ -4,7 +4,7 @@ Gov-Hub is a personal learning project focused on building a modern web applicat
 
 https://gov-hub.vercel.app/
 
-![Contracts UI image](image.png)
+![Contracts UI image](images/image.png)
 
 ## Project Goals
 
@@ -142,6 +142,27 @@ Normalized storage for contact information:
 - GIN index for full-text search
 - Trigram index for fuzzy title search
 - Automatic timestamp updates via triggers
+
+## Future Work
+
+The following features and improvements are planned for future development:
+
+- **Additional Data Sources**:
+  - Expand beyond SAM.gov to include other government contract databases
+  - Integration with other federal procurement systems
+  - Support for state and local government contract data
+
+- **Authentication and Personalization**:
+  - Implement Supabase authentication for user accounts
+  - Personal dashboards with saved searches and filters
+  - Custom alert settings for contract opportunities
+  - Persistent user preferences and settings (Currently using session storage)
+
+- **Enhanced AI Capabilities**:
+  - Include document and attachment contents in AI context for deeper analysis
+  - Improved contract summarization and comparison
+  - Automated opportunity matching based on user profile
+  - Advanced analytics and trend identification
 
 ## Learning Resources
 
