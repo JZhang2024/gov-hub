@@ -9,7 +9,7 @@ import {
   AIRequestBody,
   QUICK_QUESTIONS,
   AIMessage
-} from '@/lib/contract-assistant/types';
+} from '@/types/assistant-types';
 import ReactMarkdown from 'react-markdown';
 
 // Helper to create contract context objects

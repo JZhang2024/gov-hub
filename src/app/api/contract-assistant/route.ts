@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { 
   AIRequestBody, 
   createSystemMessage 
-} from '@/lib/contract-assistant/types';
+} from '@/types/assistant-types';
 
 const openai = new OpenAI({
     apiKey: process.env.XAI_API_KEY,

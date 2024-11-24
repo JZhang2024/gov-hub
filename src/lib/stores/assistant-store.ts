@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Contract } from '@/types/contracts';
-import type { AIMessage } from '@/lib/contract-assistant/types';
+import type { AIMessage } from '@/types/assistant-types';
 
 const MAX_CONTEXT_CONTRACTS = 5;
 const MAX_MESSAGE_HISTORY = 50;

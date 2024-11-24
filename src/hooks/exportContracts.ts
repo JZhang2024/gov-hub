@@ -1,21 +1,10 @@
 import { 
     ExportFields, 
-    ExportErrorType,
     ExportErrorDetails,
     ExportContractsOptions
 } from '@/types/contracts';
 import { useState } from 'react';
-
-class ContractExportError extends Error {
-    constructor(
-        message: string,
-        public code: ExportErrorType,
-        public details?: any
-    ) {
-        super(message);
-        this.name = 'ContractExportError';
-    }
-}
+import ContractExportError  from '@/lib/utils/ContractExportError';
 
 export async function exportContracts(options: ExportContractsOptions): Promise<void> {
     try {
