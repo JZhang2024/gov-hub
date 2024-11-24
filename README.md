@@ -12,17 +12,35 @@ Gov-Hub is a personal learning project focused on building a modern web applicat
 
 ## Features
 
-- **Contract Search & Filtering**: Search through contracts with advanced filtering options
+- **Advanced Contract Search & Filtering**: Comprehensive search capabilities with advanced filtering options
   - Filter by contract type (Solicitation, Award Notice, etc.)
   - Filter by set-aside types using official SAM.gov codes
   - Filter by status (Active, Archived, Awarded)
   - Date range filtering
-  - Value range filtering
+  - Award value range filtering
+  - Advanced text search with support for keywords and phrases
+  - Multi-select filtering for departments and agencies
+  - NAICS code filtering with industry descriptions
+
+- **Data Export Capabilities**:
+  - Export filtered results to CSV format
+  - Export to Excel (XLSX) with formatted data
+  - Export to JSON for data integration
+  - Customizable export fields
+  - Single page and bulk export support
+
+- **Contract Assistant AI Chatbot**:
+  - Natural language interaction for contract queries
+  - Intelligent contract analysis and insights
+  - Context-aware responses based on contract details
+  - Assistance with understanding contract requirements
+  - Quick answers to common contracting questions
 
 - **Contract Status Management**:
   - Active/Archived status based on contract state
   - Award status tracking
   - Clear status indicators
+  - Document attachment support with secure download links
 
 - **Set-Aside Support**:
   - Complete support for all SAM.gov set-aside codes
@@ -41,7 +59,20 @@ Gov-Hub is a personal learning project focused on building a modern web applicat
 - **Backend**:
   - Supabase (PostgreSQL)
   - Edge functions, Database functions and stored procedures
+  - Papaparse for data export (CSV, XLSX)
   - Real-time updates
+  - xAI's Grok-beta model for contract analysis
+
+- **API & Integration**:
+  - RESTful endpoints following OpenAPI standards
+  - Secure document download capabilities
+  - Real-time contract updates
+
+- **Infrastructure & Deployment**:
+  - Vercel for hosting and deployment
+  - Serverless functions (API routes)
+  - Edge runtime optimization
+  - Automatic CI/CD pipeline
 
 ## Getting Started
 
