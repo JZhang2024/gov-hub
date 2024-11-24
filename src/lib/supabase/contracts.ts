@@ -11,6 +11,8 @@ import type {
   ContractResponse,
   AnalyticsResponse,
   DatabaseContract,
+  RPCResponse,
+  RPCContact,
 } from '@/types/contracts';
 
 // Create Supabase client
@@ -186,6 +188,84 @@ export const getContracts = async (
   params?: ContractQueryParams
 ): Promise<ContractsResponse> => {
   try {
+    if (params?.search) {
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc('export_contracts', {
+          filters: {
+            search: params.search,
+            ...(params.filters || {}),
+          },
+          selected_fields: {
+            basic: true,
+            contacts: true,
+            addresses: true,
+            awards: true,
+            set_aside: true,
+            dates: true,
+            links: true
+          },
+          export_scope: 'current',
+          page_number: page,
+          page_size: pageSize
+        });
+
+      if (rpcError) throw rpcError;
+
+      // Transform the data with proper typing
+      const transformedData = (rpcData?.data || []).map((item: RPCResponse) => {
+        // Extract the full contract data from the RPC result
+        const contractData = {
+          ...item.data.basic,
+          notice_id: item.noticeId,
+          posted_date: item.data.dates?.postedDate,
+          response_deadline: item.data.dates?.responseDeadline,
+          archive_date: item.data.dates?.archiveDate,
+          set_aside_code: item.data.setAside?.type,
+          set_aside_description: item.data.setAside?.description,
+          award: item.data.award,
+          contract_addresses: [] as any[], // Type will be enforced by transformDatabaseContract
+          contract_contacts: [] as any[],
+          ui_link: item.data.links?.uiLink,
+          resource_links: item.data.links?.resourceLinks,
+        };
+
+        // Add addresses if present
+        if (item.data.addresses) {
+          if (item.data.addresses.performance) {
+            contractData.contract_addresses.push({
+              address_type: 'performance',
+              ...item.data.addresses.performance
+            });
+          }
+          if (item.data.addresses.office) {
+            contractData.contract_addresses.push({
+              address_type: 'office',
+              ...item.data.addresses.office
+            });
+          }
+        }
+
+        // Add contacts if present
+        if (item.data.contacts) {
+          contractData.contract_contacts = item.data.contacts.map((contact: RPCContact) => ({
+            contact_type: contact.type,
+            full_name: contact.name,
+            email: contact.email,
+            phone: contact.phone
+          }));
+        }
+
+        return transformDatabaseContract(contractData as DatabaseContract);
+      });
+
+      return {
+        data: transformedData,
+        count: rpcData?.totalCount || 0,
+        error: null,
+      };
+    }
+    
+    // If not searching, use the regular query with filters
     let query = supabase
       .from('contracts')
       .select(`
@@ -216,11 +296,6 @@ export const getContracts = async (
           created_at
         )
       `, { count: 'exact' });
-
-    // Apply text search
-    if (params?.search) {
-      query = query.textSearch('search_vector', params.search);
-    }
 
     // Apply filters
     if (params?.filters) {

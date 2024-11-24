@@ -399,3 +399,53 @@ export interface UseProxyDownloadProps {
   onError?: (error: Error) => void;
   onSuccess?: () => void;
 }
+
+export interface RPCContact {
+  type: string;
+  name: string;
+  email: string;
+  phone: string | null;
+}
+
+export interface RPCAddress {
+  city: string;
+  state: string;
+  zip: string;
+  address?: string;
+}
+
+export interface RPCContractData {
+  basic: {
+    title: string;
+    solicitationNumber: string | null;
+    type: string;
+    active: boolean;
+    department: string;
+    subTier: string;
+    office: string;
+  } | null;
+  dates: {
+    postedDate: string;
+    responseDeadline: string | null;
+    archiveDate: string | null;
+  } | null;
+  setAside: {
+    type: string | null;
+    description: string | null;
+  } | null;
+  award: any | null; // Keep as any since award structure matches your existing type
+  contacts: RPCContact[] | null;
+  addresses: {
+    performance: RPCAddress | null;
+    office: RPCAddress | null;
+  } | null;
+  links: {
+    uiLink: string;
+    resourceLinks: string[];
+  } | null;
+}
+
+export interface RPCResponse {
+  noticeId: string;
+  data: RPCContractData;
+}

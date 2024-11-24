@@ -2,6 +2,8 @@
 
 Gov-Hub is a personal learning project focused on building a modern web application for exploring government contract data. It serves as a practical exploration of Next.js 15, Supabase, and TypeScript while providing an intuitive interface for accessing and filtering contract data from SAM.gov.
 
+![Contracts UI image](image.png)
+
 ## Project Goals
 
 - Learn and implement Next.js 15 features and best practices

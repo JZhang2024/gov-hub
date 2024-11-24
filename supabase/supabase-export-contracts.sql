@@ -23,6 +23,26 @@ BEGIN
 
   -- Add filter conditions based on filters jsonb
   IF filters IS NOT NULL THEN
+    -- Add enhanced search filter
+    IF filters ? 'search' AND (filters->>'search') IS NOT NULL AND (filters->>'search') != '' THEN
+        query_text := query_text || format('
+            AND (
+                search_vector @@ to_tsquery(''english'', %L) OR
+                title ILIKE ''%%'' || %L || ''%%'' OR
+                solicitation_number ILIKE ''%%'' || %L || ''%%'' OR
+                department ILIKE ''%%'' || %L || ''%%'' OR
+                sub_tier ILIKE ''%%'' || %L || ''%%'' OR
+                office ILIKE ''%%'' || %L || ''%%''
+            )', 
+            process_search_terms(filters->>'search'),
+            filters->>'search',
+            filters->>'search',
+            filters->>'search',
+            filters->>'search',
+            filters->>'search'
+        );
+    END IF;
+
     -- Type filter
     IF filters ? 'type' AND jsonb_array_length(filters->'type') > 0 THEN
       query_text := query_text || ' AND c.type = ANY(ARRAY(SELECT jsonb_array_elements_text($1->''type'')))';
