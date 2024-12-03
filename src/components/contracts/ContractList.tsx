@@ -112,7 +112,7 @@ export default function ContractList() {
     return count;
   };
 
-  const filterCount = useMemo(() => getFilterCount(), [filters]);
+  const filterCount = useMemo(() => getFilterCount(), [getFilterCount]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8">

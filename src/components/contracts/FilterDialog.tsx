@@ -139,12 +139,6 @@ const FilterDialogContent = memo(({
     initialFilters.status || []
   );
 
-  const [isDialogContentVisible, setIsDialogContentVisible] = useState(false);
-
-  useEffect(() => {
-    setIsDialogContentVisible(true);
-  }, []);
-
   const handleTypeToggle = useCallback((type: ContractType) => {
     setSelectedTypes(prev => 
       prev.includes(type) 
@@ -250,113 +244,149 @@ const FilterDialogContent = memo(({
   ), [selectedStatuses, handleStatusToggle]);
 
   return (
-    <Form {...form}>
-      <div className="grid gap-6 py-4">
-        {/* Contract Types */}
-        <div className="space-y-4">
-          <FormLabel>Contract Types</FormLabel>
-          <div className="flex flex-wrap gap-2">
-            {contractTypeOptions}
+    <>
+      <Form {...form}>
+        <div className="grid gap-6 py-4">
+          {/* Contract Types */}
+          <div className="space-y-4">
+            <FormLabel>Contract Types</FormLabel>
+            <div className="flex flex-wrap gap-2">
+              {contractTypeOptions}
+            </div>
           </div>
-        </div>
 
-        {/* Status Filter */}
-        <div className="space-y-4">
-          <FormLabel>Status</FormLabel>
-          <div className="flex flex-wrap gap-2">
-            {statusBadges}
+          {/* Status Filter */}
+          <div className="space-y-4">
+            <FormLabel>Status</FormLabel>
+            <div className="flex flex-wrap gap-2">
+              {statusBadges}
+            </div>
           </div>
-        </div>
 
-        {/* Set-Aside Types */}
-        <div className="space-y-4">
-          <FormLabel>Set-Aside Types</FormLabel>
-          <div className="flex flex-wrap gap-2">
-            {setAsideOptions}
+          {/* Set-Aside Types */}
+          <div className="space-y-4">
+            <FormLabel>Set-Aside Types</FormLabel>
+            <div className="flex flex-wrap gap-2">
+              {setAsideOptions}
+            </div>
           </div>
-        </div>
-        
-        {/* Date Range */}
-        <div>
-          <FormLabel>Date Range</FormLabel>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <FormField
-              control={form.control}
-              name="dateRange.start"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      type="date"
-                      {...field}
-                      value={formatDateForInput(field.value)}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="dateRange.end"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      type="date"
-                      {...field}
-                      value={formatDateForInput(field.value)}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+          
+          {/* Date Range */}
+          <div>
+            <FormLabel>Date Range</FormLabel>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <FormField
+                control={form.control}
+                name="dateRange.start"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        type="date"
+                        {...field}
+                        value={formatDateForInput(field.value)}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="dateRange.end"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        type="date"
+                        {...field}
+                        value={formatDateForInput(field.value)}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Value Range */}
-        <div>
-          <FormLabel>Value Range</FormLabel>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            <FormField
-              control={form.control}
-              name="valueRange.min"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      type="number"
-                      placeholder="Min value"
-                      {...field}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="valueRange.max"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      type="number"
-                      placeholder="Max value"
-                      {...field}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+          {/* Value Range */}
+          <div>
+            <FormLabel>Value Range</FormLabel>
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <FormField
+                control={form.control}
+                name="valueRange.min"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        type="number"
+                        placeholder="Min value"
+                        {...field}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="valueRange.max"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <input
+                        type="number"
+                        placeholder="Max value"
+                        {...field}
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </Form>
+      </Form>
+
+      <DialogFooter className="flex justify-between">
+        <Button 
+          variant="ghost" 
+          onClick={clearFilters}
+          disabled={isLoading}
+        >
+          Clear Filters
+        </Button>
+        <div className="space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleApply}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                Applying...
+              </span>
+            ) : (
+              'Apply Filters'
+            )}
+          </Button>
+        </div>
+      </DialogFooter>
+    </>
   );
 });
+
+FilterDialogContent.displayName = 'FilterDialogContent';
 
 FilterDialog.displayName = 'FilterDialog';
 
