@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, memo } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Dialog,
   DialogContent,
@@ -8,13 +9,6 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -26,6 +20,13 @@ import {
   FilterDialogProps,
   SetAsideOption
 } from '@/types/contracts';
+
+// Dynamically import the form components
+const Form = dynamic(() => import('@/components/ui/form').then(mod => mod.Form), { ssr: false });
+const FormControl = dynamic(() => import('@/components/ui/form').then(mod => mod.FormControl), { ssr: false });
+const FormField = dynamic(() => import('@/components/ui/form').then(mod => mod.FormField), { ssr: false });
+const FormItem = dynamic(() => import('@/components/ui/form').then(mod => mod.FormItem), { ssr: false });
+const FormLabel = dynamic(() => import('@/components/ui/form').then(mod => mod.FormLabel), { ssr: false });
 
 const contractTypes: ContractType[] = [
   'Solicitation',
@@ -68,13 +69,60 @@ const statusOptions: ContractStatus[] = [
   'Awarded'
 ];
 
-const FilterDialog = ({ 
+const FilterDialog = memo(({ 
   open, 
   onClose, 
   initialFilters, 
   onApplyFilters, 
   isLoading 
 }: FilterDialogProps) => {
+  const [isContentMounted, setIsContentMounted] = useState(false);
+  
+  useEffect(() => {
+    if (open) {
+      // Small delay to let the dialog animation start
+      const timer = setTimeout(() => {
+        setIsContentMounted(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else {
+      setIsContentMounted(false);
+    }
+  }, [open]);
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Filter Contracts</DialogTitle>
+          <DialogDescription>
+            Select criteria to filter the contract list. Changes will apply to your current search results.
+          </DialogDescription>
+        </DialogHeader>
+
+        {isContentMounted ? (
+          <FilterDialogContent 
+            initialFilters={initialFilters}
+            onApplyFilters={onApplyFilters}
+            onClose={onClose}
+            isLoading={isLoading}
+          />
+        ) : (
+          <div className="py-8 flex justify-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+});
+
+const FilterDialogContent = memo(({
+  initialFilters,
+  onApplyFilters,
+  onClose,
+  isLoading
+}: Omit<FilterDialogProps, 'open'>) => {
   const form = useForm<SearchFilters>({
     defaultValues: initialFilters
   });
@@ -94,13 +142,8 @@ const FilterDialog = ({
   const [isDialogContentVisible, setIsDialogContentVisible] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      setIsDialogContentVisible(true);
-    } else {
-      const timer = setTimeout(() => setIsDialogContentVisible(false), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [open]);
+    setIsDialogContentVisible(true);
+  }, []);
 
   const handleTypeToggle = useCallback((type: ContractType) => {
     setSelectedTypes(prev => 
@@ -207,157 +250,114 @@ const FilterDialog = ({
   ), [selectedStatuses, handleStatusToggle]);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Filter Contracts</DialogTitle>
-          <DialogDescription>
-            Select criteria to filter the contract list. Changes will apply to your current search results.
-          </DialogDescription>
-        </DialogHeader>
-
-        {isDialogContentVisible && (
-          <Form {...form}>
-            <div className="grid gap-6 py-4">
-              {/* Contract Types */}
-              <div className="space-y-4">
-                <FormLabel>Contract Types</FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {contractTypeOptions}
-                </div>
-              </div>
-
-              {/* Status Filter */}
-              <div className="space-y-4">
-                <FormLabel>Status</FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {statusBadges}
-                </div>
-              </div>
-
-              {/* Set-Aside Types */}
-              <div className="space-y-4">
-                <FormLabel>Set-Aside Types</FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {setAsideOptions}
-                </div>
-              </div>
-              
-              {/* Date Range */}
-              <div>
-                <FormLabel>Date Range</FormLabel>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <FormField
-                    control={form.control}
-                    name="dateRange.start"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            type="date"
-                            {...field}
-                            value={formatDateForInput(field.value)}
-                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="dateRange.end"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            type="date"
-                            {...field}
-                            value={formatDateForInput(field.value)}
-                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Value Range */}
-              <div>
-                <FormLabel>Value Range</FormLabel>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <FormField
-                    control={form.control}
-                    name="valueRange.min"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            type="number"
-                            placeholder="Min value"
-                            {...field}
-                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="valueRange.max"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <input
-                            type="number"
-                            placeholder="Max value"
-                            {...field}
-                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
-          </Form>
-        )}
-
-        <DialogFooter className="flex justify-between">
-          <Button 
-            variant="ghost" 
-            onClick={clearFilters}
-            disabled={isLoading}
-          >
-            Clear Filters
-          </Button>
-          <div className="space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleApply}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
-                  Applying...
-                </span>
-              ) : (
-                'Apply Filters'
-              )}
-            </Button>
+    <Form {...form}>
+      <div className="grid gap-6 py-4">
+        {/* Contract Types */}
+        <div className="space-y-4">
+          <FormLabel>Contract Types</FormLabel>
+          <div className="flex flex-wrap gap-2">
+            {contractTypeOptions}
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        {/* Status Filter */}
+        <div className="space-y-4">
+          <FormLabel>Status</FormLabel>
+          <div className="flex flex-wrap gap-2">
+            {statusBadges}
+          </div>
+        </div>
+
+        {/* Set-Aside Types */}
+        <div className="space-y-4">
+          <FormLabel>Set-Aside Types</FormLabel>
+          <div className="flex flex-wrap gap-2">
+            {setAsideOptions}
+          </div>
+        </div>
+        
+        {/* Date Range */}
+        <div>
+          <FormLabel>Date Range</FormLabel>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <FormField
+              control={form.control}
+              name="dateRange.start"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      type="date"
+                      {...field}
+                      value={formatDateForInput(field.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="dateRange.end"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      type="date"
+                      {...field}
+                      value={formatDateForInput(field.value)}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Value Range */}
+        <div>
+          <FormLabel>Value Range</FormLabel>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <FormField
+              control={form.control}
+              name="valueRange.min"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      type="number"
+                      placeholder="Min value"
+                      {...field}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="valueRange.max"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      type="number"
+                      placeholder="Max value"
+                      {...field}
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+      </div>
+    </Form>
   );
-};
+});
+
+FilterDialog.displayName = 'FilterDialog';
 
 export default FilterDialog;

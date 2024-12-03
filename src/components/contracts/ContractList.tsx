@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ArrowDownWideNarrow } from 'lucide-react';
 import ContractHeader from './ContractHeader';
 import SearchBar from './SearchBar';
@@ -77,21 +77,21 @@ export default function ContractList() {
     setExpandedId(null);
   };
 
-  const handleFilter = () => {
+  const handleFilter = useCallback(() => {
     setShowFilters(true);
-  };
+  }, []);
 
-  const handleApplyFilters = (newFilters: SearchFilters) => {
+  const handleApplyFilters = useCallback((newFilters: SearchFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
     setExpandedId(null);
-  };
+  }, []);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setFilters({});
     setCurrentPage(1);
     setExpandedId(null);
-  };
+  }, []);
 
   const handleExport = () => {
     setShowExport(true);
@@ -112,7 +112,7 @@ export default function ContractList() {
     return count;
   };
 
-  const filterCount = getFilterCount();
+  const filterCount = useMemo(() => getFilterCount(), [filters]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8">
