@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -91,40 +91,51 @@ const FilterDialog = ({
     initialFilters.status || []
   );
 
-  const handleTypeToggle = (type: ContractType) => {
+  const [isDialogContentVisible, setIsDialogContentVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsDialogContentVisible(true);
+    } else {
+      const timer = setTimeout(() => setIsDialogContentVisible(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open]);
+
+  const handleTypeToggle = useCallback((type: ContractType) => {
     setSelectedTypes(prev => 
       prev.includes(type) 
         ? prev.filter(t => t !== type)
         : [...prev, type]
     );
-  };
+  }, []);
 
-  const handleSetAsideToggle = (type: SetAsideType) => {
+  const handleSetAsideToggle = useCallback((type: SetAsideType) => {
     setSelectedSetAsides(prev => 
       prev.includes(type) 
         ? prev.filter(t => t !== type)
         : [...prev, type]
     );
-  };
+  }, []);
 
-  const handleStatusToggle = (status: ContractStatus) => {
+  const handleStatusToggle = useCallback((status: ContractStatus) => {
     setSelectedStatuses(prev => 
       prev.includes(status)
         ? prev.filter(s => s !== status)
         : [...prev, status]
     );
-  };
+  }, []);
 
-  const formatDateForInput = (date: string | undefined) => {
+  const formatDateForInput = useCallback((date: string | undefined) => {
     if (!date) return '';
     try {
       return format(new Date(date), 'yyyy-MM-dd');
     } catch {
       return '';
     }
-  };
+  }, []);
 
-  const handleApply = () => {
+  const handleApply = useCallback(() => {
     const dateRange = form.getValues('dateRange');
     const valueRange = form.getValues('valueRange');
 
@@ -144,9 +155,9 @@ const FilterDialog = ({
     
     onApplyFilters(filters);
     onClose();
-  };
+  }, [form, selectedTypes, selectedSetAsides, selectedStatuses, onApplyFilters, onClose]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSelectedTypes([]);
     setSelectedSetAsides([]);
     setSelectedStatuses([]);
@@ -154,7 +165,46 @@ const FilterDialog = ({
       dateRange: { start: '', end: '' },
       valueRange: { min: undefined, max: undefined }
     });
-  };
+  }, [form]);
+
+  const contractTypeOptions = useMemo(() => (
+    contractTypes.map((type) => (
+      <Badge
+        key={type}
+        variant={selectedTypes.includes(type) ? "default" : "outline"}
+        className="cursor-pointer hover:bg-gray-100"
+        onClick={() => handleTypeToggle(type)}
+      >
+        {type}
+      </Badge>
+    ))
+  ), [selectedTypes, handleTypeToggle]);
+
+  const setAsideOptions = useMemo(() => (
+    setAsideTypes.map((type) => (
+      <Badge
+        key={type.code}
+        variant={selectedSetAsides.includes(type.code) ? "default" : "outline"}
+        className="cursor-pointer hover:bg-gray-100"
+        onClick={() => handleSetAsideToggle(type.code)}
+      >
+        {type.label}
+      </Badge>
+    ))
+  ), [selectedSetAsides, handleSetAsideToggle]);
+
+  const statusBadges = useMemo(() => (
+    statusOptions.map((status) => (
+      <Badge
+        key={status}
+        variant={selectedStatuses.includes(status) ? "default" : "outline"}
+        className="cursor-pointer hover:bg-gray-100"
+        onClick={() => handleStatusToggle(status)}
+      >
+        {status}
+      </Badge>
+    ))
+  ), [selectedStatuses, handleStatusToggle]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -166,138 +216,113 @@ const FilterDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <div className="grid gap-6 py-4">
-            {/* Contract Types */}
-            <div className="space-y-4">
-              <FormLabel>Contract Types</FormLabel>
-              <div className="flex flex-wrap gap-2">
-                {contractTypes.map((type) => (
-                  <Badge
-                    key={type}
-                    variant={selectedTypes.includes(type) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleTypeToggle(type)}
-                  >
-                    {type}
-                  </Badge>
-                ))}
+        {isDialogContentVisible && (
+          <Form {...form}>
+            <div className="grid gap-6 py-4">
+              {/* Contract Types */}
+              <div className="space-y-4">
+                <FormLabel>Contract Types</FormLabel>
+                <div className="flex flex-wrap gap-2">
+                  {contractTypeOptions}
+                </div>
               </div>
-            </div>
 
-            {/* Status Filter */}
-            <div className="space-y-4">
-              <FormLabel>Status</FormLabel>
-              <div className="flex flex-wrap gap-2">
-                {statusOptions.map((status) => (
-                  <Badge
-                    key={status}
-                    variant={selectedStatuses.includes(status) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleStatusToggle(status)}
-                  >
-                    {status}
-                  </Badge>
-                ))}
+              {/* Status Filter */}
+              <div className="space-y-4">
+                <FormLabel>Status</FormLabel>
+                <div className="flex flex-wrap gap-2">
+                  {statusBadges}
+                </div>
               </div>
-            </div>
 
-            {/* Set-Aside Types */}
-            <div className="space-y-4">
-              <FormLabel>Set-Aside Types</FormLabel>
-              <div className="flex flex-wrap gap-2">
-                {setAsideTypes.map((type) => (
-                  <Badge
-                    key={type.code}
-                    variant={selectedSetAsides.includes(type.code) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSetAsideToggle(type.code)}
-                  >
-                    {type.label}
-                  </Badge>
-                ))}
+              {/* Set-Aside Types */}
+              <div className="space-y-4">
+                <FormLabel>Set-Aside Types</FormLabel>
+                <div className="flex flex-wrap gap-2">
+                  {setAsideOptions}
+                </div>
               </div>
-            </div>
-            
-            {/* Date Range */}
-            <div>
-              <FormLabel>Date Range</FormLabel>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <FormField
-                  control={form.control}
-                  name="dateRange.start"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <input
-                          type="date"
-                          {...field}
-                          value={formatDateForInput(field.value)}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="dateRange.end"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <input
-                          type="date"
-                          {...field}
-                          value={formatDateForInput(field.value)}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+              
+              {/* Date Range */}
+              <div>
+                <FormLabel>Date Range</FormLabel>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <FormField
+                    control={form.control}
+                    name="dateRange.start"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            type="date"
+                            {...field}
+                            value={formatDateForInput(field.value)}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="dateRange.end"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            type="date"
+                            {...field}
+                            value={formatDateForInput(field.value)}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Value Range */}
-            <div>
-              <FormLabel>Value Range</FormLabel>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <FormField
-                  control={form.control}
-                  name="valueRange.min"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <input
-                          type="number"
-                          placeholder="Min value"
-                          {...field}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="valueRange.max"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <input
-                          type="number"
-                          placeholder="Max value"
-                          {...field}
-                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+              {/* Value Range */}
+              <div>
+                <FormLabel>Value Range</FormLabel>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <FormField
+                    control={form.control}
+                    name="valueRange.min"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            type="number"
+                            placeholder="Min value"
+                            {...field}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="valueRange.max"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <input
+                            type="number"
+                            placeholder="Max value"
+                            {...field}
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        )}
 
         <DialogFooter className="flex justify-between">
           <Button 
