@@ -1,4 +1,4 @@
-import AddToAssistantButton from './AddToAssistantButton';
+import AddToAssistantButton from '../assistant/AddToAssistantButton';
 import { ChevronRight, Building2, DollarSign, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ContractRowProps } from '@/types/contracts';

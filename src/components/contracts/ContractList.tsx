@@ -3,16 +3,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { ArrowDownWideNarrow } from 'lucide-react';
 import ContractHeader from './ContractHeader';
-import SearchBar from './SearchBar';
+import SearchBar from '../shared/SearchBar';
 import ContractRow from './ContractRow';
-import PaginationControls from './PaginationControls';
-import FilterDialog from './FilterDialog';
+import PaginationControls from '../shared/PaginationControls';
+import FilterDialog from '../shared/FilterDialog';
 import { getContracts } from '@/lib/supabase/contracts';
 import type { Contract, SearchFilters } from '@/types/contracts';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import ContractAssistant from './ContractAssistant';
-import ExportDialog from './ExportDialog';
+import ContractAssistant from '../assistant/ContractAssistant';
+import ExportDialog from '../shared/ExportDialog';
 const ITEMS_PER_PAGE = 25;
 
 export default function ContractList() {
