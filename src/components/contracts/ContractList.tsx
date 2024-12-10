@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ContractAssistant from '../assistant/ContractAssistant';
 import ExportDialog from '../shared/ExportDialog';
+
 const ITEMS_PER_PAGE = 25;
 
 export default function ContractList() {
@@ -28,21 +29,20 @@ export default function ContractList() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [showExport, setShowExport] = useState(false);
 
-
   useEffect(() => {
     const fetchContracts = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const { data, count, error } = await getContracts(currentPage, ITEMS_PER_PAGE, {
           search: searchQuery || undefined,
           sortOrder,
           filters,
         });
-        
+
         if (error) throw error;
-        
+
         setContracts(data);
         setTotalItems(count);
       } catch (err) {
@@ -97,12 +97,11 @@ export default function ContractList() {
     setShowExport(true);
   };
 
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const totalPages = useMemo(() => Math.ceil(totalItems / ITEMS_PER_PAGE), [totalItems]);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
 
-  // Helper to format filter badge text
-  const getFilterCount = () => {
+  const filterCount = useMemo(() => {
     let count = 0;
     if (filters.type?.length) count += filters.type.length;
     if (filters.setAside?.length) count += filters.setAside.length;
@@ -110,15 +109,13 @@ export default function ContractList() {
     if (filters.dateRange?.start || filters.dateRange?.end) count += 1;
     if (filters.valueRange?.min || filters.valueRange?.max) count += 1;
     return count;
-  };
-
-  const filterCount = useMemo(() => getFilterCount(), [getFilterCount]);
+  }, [filters]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-8">
       <ContractHeader />
-      
-      <SearchBar 
+
+      <SearchBar
         onSearch={handleSearch}
         onFilter={handleFilter}
         onExport={handleExport}
@@ -164,7 +161,7 @@ export default function ContractList() {
                 </div>
               )}
             </div>
-            
+
             {!error && contracts.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">Sort by date:</span>
@@ -175,9 +172,11 @@ export default function ContractList() {
                   className="gap-2"
                   disabled={isLoading}
                 >
-                  <ArrowDownWideNarrow className={`h-4 w-4 transition-transform ${
-                    sortOrder === 'asc' ? 'rotate-180' : ''
-                  }`} />
+                  <ArrowDownWideNarrow
+                    className={`h-4 w-4 transition-transform ${
+                      sortOrder === 'asc' ? 'rotate-180' : ''
+                    }`}
+                  />
                   {sortOrder === 'desc' ? 'Newest first' : 'Oldest first'}
                 </Button>
               </div>
@@ -211,9 +210,9 @@ export default function ContractList() {
                 key={contract.noticeId}
                 contract={contract}
                 isExpanded={expandedId === contract.noticeId}
-                onToggle={() => setExpandedId(
-                  expandedId === contract.noticeId ? null : contract.noticeId
-                )}
+                onToggle={() =>
+                  setExpandedId(expandedId === contract.noticeId ? null : contract.noticeId)
+                }
               />
             ))}
           </div>
@@ -231,7 +230,7 @@ export default function ContractList() {
         )}
       </Card>
 
-      <FilterDialog 
+      <FilterDialog
         open={showFilters}
         onClose={() => setShowFilters(false)}
         initialFilters={filters}

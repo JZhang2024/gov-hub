@@ -3,10 +3,26 @@ export interface AIMessage {
     content: string;
   }
   
-  export interface DocumentSummary {
+  export type DocumentStatus = {
+    status: 'processing' | 'completed' | 'error' | 'unsupported';
+    processedCount?: number;
+    documentCount?: number;
+    message?: string;
+  };
+  
+  export type DocumentStatuses = Record<string, DocumentStatus>;
+  
+  export type DocumentProcessingResult = {
+    url: string;
+    summary: string | null;
+    status: 'success' | 'unsupported' | 'error';
+    message?: string;
+  };
+  
+  export type DocumentSummary = {
     url: string;
     summary: string;
-  }
+  };
   
   export interface ContractContext {
     title: string;
@@ -45,7 +61,8 @@ export interface AIMessage {
     "Compare these contracts",
     "When are these due?",
     "Which ones are set-aside?",
-    "Compare requirements"
+    "Compare requirements",
+    "Summarize the attached documents"
   ] as const;
   
   // Helper to format contract context for LLM
@@ -76,5 +93,6 @@ export interface AIMessage {
   
   You have access to the following contract details:
   
-  ${formatContractContext(contracts)}`
+  ${formatContractContext(contracts)}
+  Remember: Limit your analysis and responses to ONLY the contract information provided above. Do not reference any contracts or their associated documents that were removed even if mentioned in previous messages.`
   });

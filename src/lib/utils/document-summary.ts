@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/utils/supabase/client';
+import { DocumentProcessingResult } from '@/types/assistant-types';
 
 const supabase = createClient();
 
 export async function summarizeDocuments(
     documents: Array<{ url: string; noticeId: string }>,
-    onProgress?: (processed: number) => void
-  ): Promise<Array<{ url: string; summary: string | null }>> {
+    onProgress?: (processed: number, status: DocumentProcessingResult) => void
+  ): Promise<Array<DocumentProcessingResult>> {
     try {
       const summaryPromises = documents.map(async ({ url, noticeId }, index) => {
         try {
@@ -19,8 +20,13 @@ export async function summarizeDocuments(
   
           if (cached?.summary) {
             console.log(`Using cached summary for ${url}`);
-            onProgress?.(index + 1);
-            return { url, summary: cached.summary };
+            const result: DocumentProcessingResult = { 
+              url, 
+              summary: cached.summary,
+              status: 'success'
+            };
+            onProgress?.(index + 1, result);
+            return result;
           }
           
           console.log(`Cache miss for ${url}`);
@@ -31,8 +37,14 @@ export async function summarizeDocuments(
   
           const response = await fetch(proxyUrl);
           if (!response.ok) {
-            console.error(`Failed to fetch document: ${url}`);
-            return { url, summary: null };
+            const result: DocumentProcessingResult = { 
+              url, 
+              summary: null,
+              status: 'error',
+              message: 'Failed to fetch document'
+            };
+            onProgress?.(index + 1, result);
+            return result;
           }
   
           // Check both content type and filename for PDF
@@ -47,8 +59,14 @@ export async function summarizeDocuments(
             fileName.toLowerCase().endsWith('.pdf');
   
           if (!isPdf) {
-            console.log(`Document type ${contentType} (${fileName}) not yet supported for AI analysis: ${url}`);
-            return { url, summary: null };
+            const result: DocumentProcessingResult = { 
+              url, 
+              summary: null,
+              status: 'unsupported',
+              message: `Document type ${contentType || fileName} not yet supported for AI analysis`
+            };
+            onProgress?.(index + 1, result);
+            return result;
           }
   
           const blob = await response.blob();
@@ -61,7 +79,7 @@ export async function summarizeDocuments(
             reader.readAsDataURL(blob);
           });
   
-          const summaryResponse = await fetch('/api/summarize-document', {
+          const summaryResponse = await fetch('/api/summarize-doc-anthropic', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -73,7 +91,14 @@ export async function summarizeDocuments(
           });
   
           if (!summaryResponse.ok) {
-            throw new Error('Failed to generate summary');
+            const result: DocumentProcessingResult = { 
+              url, 
+              summary: null,
+              status: 'error',
+              message: 'Failed to generate summary'
+            };
+            onProgress?.(index + 1, result);
+            return result;
           }
   
           const { summary } = await summaryResponse.json();
@@ -86,12 +111,23 @@ export async function summarizeDocuments(
             summary
           });
   
-          onProgress?.(index + 1);
-          return { url, summary };
+          const result: DocumentProcessingResult = { 
+            url, 
+            summary, 
+            status: 'success' 
+          };
+          onProgress?.(index + 1, result);
+          return result;
   
         } catch (error) {
-          console.error(`Error processing document ${url}:`, error);
-          return { url, summary: null };
+          const result: DocumentProcessingResult = { 
+            url, 
+            summary: null,
+            status: 'error',
+            message: error instanceof Error ? error.message : 'Unknown error'
+          };
+          onProgress?.(index + 1, result);
+          return result;
         }
       });
   
