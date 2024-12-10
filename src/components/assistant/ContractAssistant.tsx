@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { Bot, User, Loader2, FileText, X, Book, ChevronDown } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Bot, User, FileText, X, Book, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAssistantStore, MAX_CONTRACTS } from '@/lib/stores/assistant-store';
 import { formatDate } from '@/lib/utils/format-data';
@@ -14,7 +14,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import ReactMarkdown from 'react-markdown';
+import { StreamingMessage } from './StreamingMessage';
 import { createContractContext } from '@/lib/utils/contract-context';
 import DocumentProcessingStatus from './DocumentProcessingStatus';
 
@@ -27,6 +27,7 @@ export default function ContractAssistant() {
     isPanelOpen,
     removeContract,
     addMessage,
+    updateMessage,
     setIsLoading,
     togglePanel,
     setIsPanelOpen,
@@ -40,10 +41,6 @@ export default function ContractAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const handleSend = async (content: string) => {
     if (!content.trim() || contextContracts.length === 0) return;
     
@@ -52,20 +49,27 @@ export default function ContractAssistant() {
     setIsLoading(true);
 
     try {
-      // Create context objects for each contract asynchronously
       const contractContextPromises = contextContracts.map(createContractContext);
       const contractContexts = await Promise.all(contractContextPromises);
 
       // Add user message first
       addMessage(userMessage);
+      scrollToBottom();
 
-      // Prepare request body using shared type and include the new message
+      // Create temporary message for streaming
+      const tempMessageId = Date.now().toString();
+      addMessage({ 
+        role: 'assistant', 
+        content: '', 
+        id: tempMessageId,
+        isStreaming: true 
+      });
+
       const requestBody: AIRequestBody = {
         messages: [...messages, userMessage],
         context: contractContexts
       };
 
-      // Make API call to AI endpoint
       const response = await fetch('/api/contract-assistant', {
         method: 'POST',
         headers: {
@@ -78,10 +82,44 @@ export default function ContractAssistant() {
         throw new Error('Failed to get AI response');
       }
 
-      const data = await response.json();
-      
-      // Add assistant message after getting response
-      addMessage({ role: 'assistant', content: data.message });
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      let accumulatedContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            
+            if (data === '[DONE]') {
+              // Update final message and remove streaming flag
+              updateMessage(tempMessageId, accumulatedContent, false);
+              scrollToBottom();
+              break;
+            }
+
+            try {
+              const { content } = JSON.parse(data);
+              accumulatedContent += content;
+              // Update streaming message with accumulated content
+              updateMessage(tempMessageId, accumulatedContent, true);
+            } catch (e) {
+              console.error('Error parsing SSE data:', e);
+            }
+          }
+        }
+      }
 
     } catch (error) {
       console.error('Error in handleSend:', error);
@@ -89,6 +127,7 @@ export default function ContractAssistant() {
         role: 'assistant',
         content: "I apologize, but I encountered an error processing your question. Please try again."
       });
+      scrollToBottom();
     } finally {
       setIsLoading(false);
     }
@@ -197,7 +236,7 @@ export default function ContractAssistant() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
               <div
-                key={index}
+                key={message.id || index}
                 className={`flex gap-3 ${
                   message.role === 'assistant' ? 'justify-start' : 'justify-end'
                 }`}
@@ -214,13 +253,16 @@ export default function ContractAssistant() {
                       : 'bg-blue-600 text-white'
                   }`}
                 >
-                  <div className={message.role === 'assistant' ? 'prose prose-sm max-w-none' : ''}>
-                    <ReactMarkdown
-                      className="whitespace-pre-wrap font-sans"
-                    >
+                  {message.role === 'assistant' ? (
+                    <StreamingMessage 
+                      content={message.content} 
+                      isStreaming={message.isStreaming || false} 
+                    />
+                  ) : (
+                    <div className="whitespace-pre-wrap font-sans">
                       {message.content}
-                    </ReactMarkdown>
-                  </div>
+                    </div>
+                  )}
                 </div>
                 {message.role === 'user' && (
                   <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
@@ -229,16 +271,6 @@ export default function ContractAssistant() {
                 )}
               </div>
             ))}
-            {isLoading && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-blue-600" />
-                </div>
-                <div className="max-w-[80%] rounded-xl p-3 bg-white border shadow-sm">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                </div>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </div>
 

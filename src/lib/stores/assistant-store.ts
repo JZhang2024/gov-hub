@@ -24,6 +24,7 @@ interface AssistantState {
   togglePanel: () => void;
   setIsPanelOpen: (open: boolean) => void;
   setDocumentStatus: (contractId: string, status: DocumentStatus) => void;
+  updateMessage: (id: string, content: string, isStreaming: boolean) => void;
 }
 
 // Custom storage object that uses window.sessionStorage
@@ -189,6 +190,12 @@ export const useAssistantStore = create<AssistantState>()(
           content: 'Hello! I can help you analyze contracts. Add contracts to the context by clicking the "Add to Assistant" button on any contract.'
         }]
       }),
+
+      updateMessage: (id, content, isStreaming) => set((state) => ({
+        messages: state.messages.map(msg => 
+          msg.id === id ? { ...msg, content, isStreaming } : msg
+        )
+      })),
 
       setIsLoading: (loading) => set({ isLoading: loading }),
       togglePanel: () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
