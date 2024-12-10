@@ -3,34 +3,13 @@ import { Bot, User, Loader2, FileText, X, Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAssistantStore, MAX_CONTRACTS } from '@/lib/stores/assistant-store';
 import { formatDate } from '@/lib/utils/format-data';
-import { Contract } from '@/types/contracts';
 import { 
-  ContractContext,
   AIRequestBody,
   QUICK_QUESTIONS,
   AIMessage
 } from '@/types/assistant-types';
 import ReactMarkdown from 'react-markdown';
-
-// Helper to create contract context objects
-const createContractContext = (contract: Contract): ContractContext => ({
-  title: contract.title,
-  id: contract.noticeId,
-  solicitationNumber: contract.solicitationNumber,
-  department: contract.fullParentPathName,
-  type: contract.type,
-  postedDate: contract.postedDate,
-  responseDeadline: contract.responseDeadLine,
-  setAside: {
-    type: contract.typeOfSetAside,
-    description: contract.typeOfSetAsideDescription
-  },
-  naicsCode: contract.naicsCode,
-  status: contract.active === 'Yes' ? 'Active' : 'Inactive',
-  amount: contract.award?.amount,
-  placeOfPerformance: `${contract.placeOfPerformance.city.name}, ${contract.placeOfPerformance.state.code}`,
-  description: contract.description
-});
+import { createContractContext } from '@/lib/utils/contract-context';
 
 export default function ContractAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -64,8 +43,11 @@ export default function ContractAssistant() {
     setIsLoading(true);
 
     try {
-      // Create context objects for each contract
-      const contractContexts = contextContracts.map(createContractContext);
+      // Create context objects for each contract asynchronously
+      const contractContextPromises = contextContracts.map(createContractContext);
+      const contractContexts = await Promise.all(contractContextPromises);
+
+      console.log(contractContexts)
 
       // Add user message first
       addMessage(userMessage);

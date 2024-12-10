@@ -3,6 +3,11 @@ export interface AIMessage {
     content: string;
   }
   
+  export interface DocumentSummary {
+    url: string;
+    summary: string;
+  }
+  
   export interface ContractContext {
     title: string;
     id: string;
@@ -20,6 +25,7 @@ export interface AIMessage {
     amount?: string;
     placeOfPerformance: string;
     description?: string;
+    documents?: DocumentSummary[];
   }
   
   export interface AIRequestBody {
@@ -57,6 +63,9 @@ export interface AIMessage {
   Value: ${contract.amount || 'Not specified'}
   Location: ${contract.placeOfPerformance}
   ${contract.description ? `Description: ${contract.description}` : ''}
+  ${contract.documents?.length ? `\nAttached Documents:\n${contract.documents.map(doc => 
+    `- ${doc.url}\n  Summary: ${doc.summary}`
+  ).join('\n')}` : ''}
     `).join('\n\n');
   };
   
