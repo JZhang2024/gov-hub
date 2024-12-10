@@ -71,7 +71,7 @@ export const useAssistantStore = create<AssistantState>()(
       documentStatus: {},
 
       addContract: async (contract) => {
-        const { contextContracts } = get();
+        const { contextContracts, documentStatus } = get();
         
         if (contextContracts.length >= MAX_CONTEXT_CONTRACTS) {
           console.warn('Maximum context limit reached');
@@ -79,7 +79,10 @@ export const useAssistantStore = create<AssistantState>()(
         }
         
         if (contextContracts.some(c => c.noticeId === contract.noticeId)) {
-          return;
+          // If we already have stored status for this contract, don't reset it
+          if (documentStatus[contract.noticeId]) {
+            return;
+          }
         }
 
         // First update state with new contract
@@ -197,7 +200,8 @@ export const useAssistantStore = create<AssistantState>()(
       partialize: (state) => ({
         contextContracts: state.contextContracts,
         messages: state.messages,
-        isPanelOpen: state.isPanelOpen
+        isPanelOpen: state.isPanelOpen,
+        documentStatus: state.documentStatus
       }),
       version: 1
     }
