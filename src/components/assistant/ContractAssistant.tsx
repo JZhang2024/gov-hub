@@ -1,36 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bot, User, Loader2, FileText, X, Book } from 'lucide-react';
+import { Bot, User, Loader2, FileText, X, Book, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAssistantStore, MAX_CONTRACTS } from '@/lib/stores/assistant-store';
 import { formatDate } from '@/lib/utils/format-data';
-import { Contract } from '@/types/contracts';
 import { 
-  ContractContext,
   AIRequestBody,
   QUICK_QUESTIONS,
   AIMessage
 } from '@/types/assistant-types';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import ReactMarkdown from 'react-markdown';
-
-// Helper to create contract context objects
-const createContractContext = (contract: Contract): ContractContext => ({
-  title: contract.title,
-  id: contract.noticeId,
-  solicitationNumber: contract.solicitationNumber,
-  department: contract.fullParentPathName,
-  type: contract.type,
-  postedDate: contract.postedDate,
-  responseDeadline: contract.responseDeadLine,
-  setAside: {
-    type: contract.typeOfSetAside,
-    description: contract.typeOfSetAsideDescription
-  },
-  naicsCode: contract.naicsCode,
-  status: contract.active === 'Yes' ? 'Active' : 'Inactive',
-  amount: contract.award?.amount,
-  placeOfPerformance: `${contract.placeOfPerformance.city.name}, ${contract.placeOfPerformance.state.code}`,
-  description: contract.description
-});
+import { createContractContext } from '@/lib/utils/contract-context';
+import DocumentProcessingStatus from './DocumentProcessingStatus';
 
 export default function ContractAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -43,10 +29,12 @@ export default function ContractAssistant() {
     addMessage,
     setIsLoading,
     togglePanel,
-    setIsPanelOpen
+    setIsPanelOpen,
+    documentStatus
   } = useAssistantStore();
   
   const [input, setInput] = useState('');
+  const [isContextExpanded, setIsContextExpanded] = useState(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -64,8 +52,9 @@ export default function ContractAssistant() {
     setIsLoading(true);
 
     try {
-      // Create context objects for each contract
-      const contractContexts = contextContracts.map(createContractContext);
+      // Create context objects for each contract asynchronously
+      const contractContextPromises = contextContracts.map(createContractContext);
+      const contractContexts = await Promise.all(contractContextPromises);
 
       // Add user message first
       addMessage(userMessage);
@@ -113,7 +102,7 @@ export default function ContractAssistant() {
   };
 
   return (
-    <>
+    <TooltipProvider>
       {/* Floating Button */}
       <Button
         onClick={togglePanel}
@@ -151,42 +140,58 @@ export default function ContractAssistant() {
             </Button>
           </div>
 
-          {/* Context Display */}
-          <div className="p-4 bg-blue-50 border-b">
-            <div className="flex items-center gap-2 mb-2 text-sm text-blue-700">
-              <Book className="h-4 w-4" />
-              <span>Current Context</span>
-              <span className="bg-blue-100 px-2 py-0.5 rounded-full">
-                {contextContracts.length}/{MAX_CONTRACTS} max
-              </span>
-            </div>
-            <div className="space-y-2">
-              {contextContracts.map((contract) => (
-                <div 
-                  key={contract.noticeId}
-                  className="flex items-center justify-between bg-white p-2 rounded-lg shadow-sm"
-                >
-                  <div className="text-sm truncate">
-                    <div className="font-medium">{contract.title}</div>
-                    <div className="text-gray-500">Posted: {formatDate(contract.postedDate)}</div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeContract(contract.noticeId)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+          {/* Collapsible Context Display */}
+          <Collapsible
+            open={isContextExpanded}
+            onOpenChange={setIsContextExpanded}
+            className="bg-blue-50 border-b"
+          >
+            <CollapsibleTrigger asChild>
+              <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-blue-100/50 transition-colors">
+                <div className="flex items-center gap-2 text-sm text-blue-700">
+                  <Book className="h-4 w-4" />
+                  <span>Current Context</span>
+                  <span className="bg-blue-100 px-2 py-0.5 rounded-full">
+                    {contextContracts.length}/{MAX_CONTRACTS}
+                  </span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-blue-700 transition-transform ${isContextExpanded ? 'rotate-180' : ''}`} />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="p-4 pt-0 space-y-2">
+                {contextContracts.map((contract) => (
+                  <div 
+                    key={contract.noticeId}
+                    className="flex items-center justify-between bg-white p-2 rounded-lg shadow-sm"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              {contextContracts.length === 0 && (
-                <div className="text-sm text-gray-500 bg-white p-3 rounded-lg">
-                  No contracts added. Click &quot;Add to Assistant&quot; on any contract to analyze it.
-                </div>
-              )}
-            </div>
-          </div>
+                    <div className="text-sm truncate">
+                      <div className="font-medium">{contract.title}</div>
+                      <div className="text-gray-500">Posted: {formatDate(contract.postedDate)}</div>
+                      {contract.resourceLinks && contract.resourceLinks.length > 0 && documentStatus[contract.noticeId] && (
+                        <div className="text-xs mt-1">
+                          <DocumentProcessingStatus {...documentStatus[contract.noticeId]} />
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeContract(contract.noticeId)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {contextContracts.length === 0 && (
+                  <div className="text-sm text-gray-500 bg-white p-3 rounded-lg">
+                    No contracts added. Click &quot;Add to Assistant&quot; on any contract to analyze it.
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -291,6 +296,6 @@ export default function ContractAssistant() {
           </div>
         </div>
       </div>
-    </>
+    </TooltipProvider>
   );
 }

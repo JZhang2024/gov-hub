@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Contract } from '@/types/contracts';
-import type { AIMessage } from '@/types/assistant-types';
+import type { AIMessage, DocumentStatus } from '@/types/assistant-types';
+import { createContractContext } from '@/lib/utils/contract-context';
 
 const MAX_CONTEXT_CONTRACTS = 5;
 const MAX_MESSAGE_HISTORY = 50;
@@ -12,6 +13,7 @@ interface AssistantState {
   isLoading: boolean;
   isPanelOpen: boolean;
   hasReachedLimit: boolean;
+  documentStatus: Record<string, DocumentStatus>;
   
   addContract: (contract: Contract) => void;
   removeContract: (contractId: string) => void;
@@ -21,6 +23,7 @@ interface AssistantState {
   setIsLoading: (loading: boolean) => void;
   togglePanel: () => void;
   setIsPanelOpen: (open: boolean) => void;
+  setDocumentStatus: (contractId: string, status: DocumentStatus) => void;
 }
 
 // Custom storage object that uses window.sessionStorage
@@ -28,8 +31,7 @@ const customStorage = {
   getItem: (name: string): string | null => {
     if (typeof window === 'undefined') return null;
     try {
-      const item = window.sessionStorage.getItem(name);
-      return item;
+      return window.sessionStorage.getItem(name);
     } catch (e) {
       console.error('Error reading from sessionStorage:', e);
       return null;
@@ -57,8 +59,7 @@ const customStorage = {
 
 export const useAssistantStore = create<AssistantState>()(
   persist(
-    (set) => ({
-      // Initial state
+    (set, get) => ({
       contextContracts: [],
       messages: [{
         role: 'assistant',
@@ -66,57 +67,105 @@ export const useAssistantStore = create<AssistantState>()(
       }],
       isLoading: false,
       isPanelOpen: false,
+      hasReachedLimit: false,
+      documentStatus: {},
 
-      // Computed properties
-      hasReachedLimit: false, // Will be computed in middleware
-
-      // Actions
-      addContract: (contract) => set((state) => {
-        if (state.contextContracts.length >= MAX_CONTEXT_CONTRACTS) {
+      addContract: async (contract) => {
+        const { contextContracts } = get();
+        
+        if (contextContracts.length >= MAX_CONTEXT_CONTRACTS) {
           console.warn('Maximum context limit reached');
-          return state;
+          return;
         }
         
-        if (state.contextContracts.some(c => c.noticeId === contract.noticeId)) {
-          return state;
+        if (contextContracts.some(c => c.noticeId === contract.noticeId)) {
+          return;
         }
 
-        return {
+        // First update state with new contract
+        set((state) => ({
           contextContracts: [...state.contextContracts, contract],
           messages: [
             ...state.messages,
             {
               role: 'assistant',
-              content: `Added "${contract.title}" to the context. You can now ask questions about this contract.`
+              content: `Added "${contract.title}" to the context. ${
+                contract.resourceLinks?.length 
+                  ? 'Processing attached documents...' 
+                  : 'You can now ask questions about this contract.'
+              }`
             }
           ],
-          hasReachedLimit: state.contextContracts.length + 1 >= MAX_CONTEXT_CONTRACTS
+          hasReachedLimit: state.contextContracts.length + 1 >= MAX_CONTEXT_CONTRACTS,
+          documentStatus: contract.resourceLinks?.length ? {
+            ...state.documentStatus,
+            [contract.noticeId]: {
+              status: 'processing',
+              documentCount: contract.resourceLinks.length,
+              processedCount: 0
+            }
+          } : state.documentStatus
+        }));
+
+        // Then start document processing if needed
+        if (contract.resourceLinks?.length) {
+          try {
+            await createContractContext(contract);
+          } catch (error) {
+            console.error('Error processing contract documents:', error);
+            set((state) => ({
+              documentStatus: {
+                ...state.documentStatus,
+                [contract.noticeId]: {
+                  status: 'error',
+                  documentCount: contract.resourceLinks?.length || 0,
+                  message: error instanceof Error ? error.message : 'Unknown error'
+                }
+              }
+            }));
+          }
+        }
+      },
+
+      removeContract: (contractId) => set((state) => {
+        const { documentStatus, ...stateRest } = state;
+        const { ...remainingStatus } = documentStatus;
+        
+        // Find the contract title before removing it
+        const contract = state.contextContracts.find(c => c.noticeId === contractId);
+        const title = contract?.title || contractId;
+        
+        return {
+          ...stateRest,
+          contextContracts: state.contextContracts.filter(c => c.noticeId !== contractId),
+          messages: [
+            ...state.messages,
+            {
+              role: 'assistant',
+              content: `Removed "${title}" from the context.`
+            }
+          ],
+          hasReachedLimit: false,
+          documentStatus: remainingStatus
         };
       }),
 
-      removeContract: (contractId) => set((state) => ({
-        contextContracts: state.contextContracts.filter(c => c.noticeId !== contractId),
-        messages: [
-          ...state.messages,
-          {
-            role: 'assistant',
-            content: `Removed contract ${contractId} from the context.`
-          }
-        ],
-        hasReachedLimit: false
+      setDocumentStatus: (contractId, status) => set((state) => ({
+        documentStatus: {
+          ...state.documentStatus,
+          [contractId]: status
+        }
       })),
 
-      clearContext: () => set((state) => ({
+      clearContext: () => set({
         contextContracts: [],
-        messages: [
-          ...state.messages,
-          {
-            role: 'assistant',
-            content: 'Cleared all contracts from the context.'
-          }
-        ],
-        hasReachedLimit: false
-      })),
+        messages: [{
+          role: 'assistant',
+          content: 'Cleared all contracts from the context.'
+        }],
+        hasReachedLimit: false,
+        documentStatus: {}
+      }),
 
       addMessage: (message) => set((state) => {
         const messages = [...state.messages, message];
@@ -139,12 +188,8 @@ export const useAssistantStore = create<AssistantState>()(
       }),
 
       setIsLoading: (loading) => set({ isLoading: loading }),
-
-      togglePanel: () => set((state) => ({ 
-        isPanelOpen: !state.isPanelOpen 
-      })),
-
-      setIsPanelOpen: (open) => set({ isPanelOpen: open }),
+      togglePanel: () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
+      setIsPanelOpen: (open) => set({ isPanelOpen: open })
     }),
     {
       name: 'contract-assistant-storage',
@@ -154,7 +199,6 @@ export const useAssistantStore = create<AssistantState>()(
         messages: state.messages,
         isPanelOpen: state.isPanelOpen
       }),
-      // Added version key to handle storage schema updates
       version: 1
     }
   )

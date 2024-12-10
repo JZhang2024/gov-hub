@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/utils/supabase/client';
 import type { 
   Contract, 
   SearchFilters, 
@@ -16,10 +16,7 @@ import type {
 } from '@/types/contracts';
 
 // Create Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = createClient();
 
 // Helper function to determine contract status
 const determineContractStatus = (contract: DatabaseContract): ContractStatus => {
