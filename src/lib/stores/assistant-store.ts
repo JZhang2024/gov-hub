@@ -2,9 +2,16 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Contract } from '@/types/contracts';
 import type { AIMessage } from '@/types/assistant-types';
+import { createContractContext } from '@/lib/utils/contract-context';
 
 const MAX_CONTEXT_CONTRACTS = 5;
 const MAX_MESSAGE_HISTORY = 50;
+
+interface DocumentStatus {
+  status: 'processing' | 'completed' | 'error';
+  documentCount?: number;
+  processedCount?: number;
+}
 
 interface AssistantState {
   contextContracts: Contract[];
@@ -12,6 +19,7 @@ interface AssistantState {
   isLoading: boolean;
   isPanelOpen: boolean;
   hasReachedLimit: boolean;
+  documentStatus: Record<string, DocumentStatus>;
   
   addContract: (contract: Contract) => void;
   removeContract: (contractId: string) => void;
@@ -21,6 +29,7 @@ interface AssistantState {
   setIsLoading: (loading: boolean) => void;
   togglePanel: () => void;
   setIsPanelOpen: (open: boolean) => void;
+  setDocumentStatus: (contractId: string, status: DocumentStatus) => void;
 }
 
 // Custom storage object that uses window.sessionStorage
@@ -57,8 +66,7 @@ const customStorage = {
 
 export const useAssistantStore = create<AssistantState>()(
   persist(
-    (set) => ({
-      // Initial state
+    (set, get) => ({
       contextContracts: [],
       messages: [{
         role: 'assistant',
@@ -66,33 +74,73 @@ export const useAssistantStore = create<AssistantState>()(
       }],
       isLoading: false,
       isPanelOpen: false,
+      hasReachedLimit: false,
+      documentStatus: {},
 
-      // Computed properties
-      hasReachedLimit: false, // Will be computed in middleware
+      addContract: async (contract) => {
+        set((state) => {
+          if (state.contextContracts.length >= MAX_CONTEXT_CONTRACTS) {
+            console.warn('Maximum context limit reached');
+            return state;
+          }
+          
+          if (state.contextContracts.some(c => c.noticeId === contract.noticeId)) {
+            return state;
+          }
 
-      // Actions
-      addContract: (contract) => set((state) => {
-        if (state.contextContracts.length >= MAX_CONTEXT_CONTRACTS) {
-          console.warn('Maximum context limit reached');
-          return state;
-        }
-        
-        if (state.contextContracts.some(c => c.noticeId === contract.noticeId)) {
-          return state;
-        }
+          // Initialize document processing status
+          if (contract.resourceLinks?.length) {
+            const status: DocumentStatus = {
+              status: 'processing',
+              documentCount: contract.resourceLinks.length,
+              processedCount: 0
+            };
+            state.documentStatus[contract.noticeId] = status;
+          }
 
-        return {
-          contextContracts: [...state.contextContracts, contract],
-          messages: [
-            ...state.messages,
-            {
-              role: 'assistant',
-              content: `Added "${contract.title}" to the context. You can now ask questions about this contract.`
-            }
-          ],
-          hasReachedLimit: state.contextContracts.length + 1 >= MAX_CONTEXT_CONTRACTS
-        };
-      }),
+          // Start document processing
+          createContractContext(contract).then(() => {
+            set((state) => ({
+              documentStatus: {
+                ...state.documentStatus,
+                [contract.noticeId]: {
+                  status: 'completed',
+                  documentCount: contract.resourceLinks?.length || 0,
+                  processedCount: contract.resourceLinks?.length || 0
+                }
+              }
+            }));
+          }).catch((error) => {
+            console.error('Error processing contract documents:', error);
+            set((state) => ({
+              documentStatus: {
+                ...state.documentStatus,
+                [contract.noticeId]: {
+                  status: 'error',
+                  documentCount: contract.resourceLinks?.length || 0,
+                  processedCount: 0
+                }
+              }
+            }));
+          });
+
+          return {
+            contextContracts: [...state.contextContracts, contract],
+            messages: [
+              ...state.messages,
+              {
+                role: 'assistant',
+                content: `Added "${contract.title}" to the context. ${
+                  contract.resourceLinks?.length 
+                    ? 'Processing attached documents...' 
+                    : 'You can now ask questions about this contract.'
+                }`
+              }
+            ],
+            hasReachedLimit: state.contextContracts.length + 1 >= MAX_CONTEXT_CONTRACTS
+          };
+        });
+      },
 
       removeContract: (contractId) => set((state) => ({
         contextContracts: state.contextContracts.filter(c => c.noticeId !== contractId),
@@ -103,7 +151,15 @@ export const useAssistantStore = create<AssistantState>()(
             content: `Removed contract ${contractId} from the context.`
           }
         ],
-        hasReachedLimit: false
+        hasReachedLimit: false,
+        
+      })),
+
+      setDocumentStatus: (contractId, status) => set((state) => ({
+        documentStatus: {
+          ...state.documentStatus,
+          [contractId]: status
+        }
       })),
 
       clearContext: () => set((state) => ({
