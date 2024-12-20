@@ -20,7 +20,6 @@ export async function POST(request: Request) {
 
     const completion = await anthropic.beta.messages.create({
       model: 'claude-3-5-sonnet-20241022',
-      betas: ['pdfs-2024-09-25', 'prompt-caching-2024-07-31'],
       max_tokens: 1024,
       messages: [{
         role: 'user',
